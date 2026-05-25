@@ -5,8 +5,14 @@
  * Reads values from the .env file and exposes them as constants.
  */
 
-// Load .env only once
-$envPath = dirname(__DIR__, 2) . '/.env';
+// BASE_PATH is defined in the front controller before this file is loaded.
+// Fallback: derive it from __DIR__ in case this file is ever included standalone.
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', dirname(__DIR__, 2));
+}
+
+// Load .env only once — path derived from BASE_PATH so it's always correct.
+$envPath = BASE_PATH . '/.env';
 
 if (file_exists($envPath)) {
     $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -28,17 +34,17 @@ if (file_exists($envPath)) {
 }
 
 // ── Application constants ────────────────────────────────────────────────────
-define('APP_NAME',     env('APP_NAME',     'Academic Compliance & Violation Management System'));
-define('APP_URL',      env('APP_URL',      'http://localhost'));
-define('APP_ENV',      env('APP_ENV',      'production'));
-define('BASE_PATH',    dirname(__DIR__, 2)); // project root
+// BASE_PATH is already defined above (or by the front controller) — do not redefine it.
+defined('APP_NAME') || define('APP_NAME', env('APP_NAME', 'Academic Compliance & Violation Management System'));
+defined('APP_URL')  || define('APP_URL',  env('APP_URL',  'http://localhost'));
+defined('APP_ENV')  || define('APP_ENV',  env('APP_ENV',  'production'));
 
 // ── Session constants ────────────────────────────────────────────────────────
-define('SESSION_NAME',     env('SESSION_NAME',     'techxp_session'));
-define('SESSION_LIFETIME', (int) env('SESSION_LIFETIME', 120));
+defined('SESSION_NAME')     || define('SESSION_NAME',     env('SESSION_NAME',     'techxp_session'));
+defined('SESSION_LIFETIME') || define('SESSION_LIFETIME', (int) env('SESSION_LIFETIME', 120));
 
 // ── Upload path ──────────────────────────────────────────────────────────────
-define('UPLOAD_PATH', BASE_PATH . '/storage/' . env('UPLOAD_PATH', 'uploads/evidence/'));
+defined('UPLOAD_PATH') || define('UPLOAD_PATH', BASE_PATH . '/storage/' . env('UPLOAD_PATH', 'uploads/evidence/'));
 
 /**
  * Helper: get an environment variable with an optional default.

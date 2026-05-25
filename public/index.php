@@ -23,6 +23,10 @@ require_once BASE_PATH . '/app/core/Controller.php';
 require_once BASE_PATH . '/app/core/Session.php';
 require_once BASE_PATH . '/app/core/Router.php';
 
+// ── 2b. Middleware (loaded globally so any controller can use them) ───────────
+require_once BASE_PATH . '/app/middleware/AuthMiddleware.php';
+require_once BASE_PATH . '/app/middleware/RoleMiddleware.php';
+
 // ── 3. Start session ─────────────────────────────────────────────────────────
 Session::start();
 
