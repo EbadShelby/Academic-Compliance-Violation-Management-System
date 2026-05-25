@@ -27,6 +27,9 @@ require_once BASE_PATH . '/app/core/Router.php';
 require_once BASE_PATH . '/app/middleware/AuthMiddleware.php';
 require_once BASE_PATH . '/app/middleware/RoleMiddleware.php';
 
+// ── 2c. Global helpers ───────────────────────────────────────────────────────
+require_once BASE_PATH . '/app/helpers/auth.php';
+
 // ── 3. Start session ─────────────────────────────────────────────────────────
 Session::start();
 
