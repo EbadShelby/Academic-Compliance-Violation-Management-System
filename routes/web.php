@@ -38,3 +38,9 @@ $router->post('/admin/users/{id}/delete', 'UserController@delete');
 
 // ── Audit Logs ───────────────────────────────────────────────────────────────
 $router->get('/admin/audit-logs', 'AuditController@index');
+
+// ── Evidence Files ────────────────────────────────────────────────────────────
+$router->post('/violations/{id}/evidence',         'EvidenceController@upload');   // attach file to violation
+$router->get('/evidence/{id}',                     'EvidenceController@show');     // serve / download file
+$router->post('/evidence/{id}/delete',             'EvidenceController@delete');   // admin hard-delete
+

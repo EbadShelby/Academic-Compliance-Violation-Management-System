@@ -1,0 +1,5 @@
+# Deny direct HTTP access to all uploaded files.
+# Files are served only through the application layer (EvidenceController).
+# This prevents direct execution of any accidentally uploaded script.
+Order Allow,Deny
+Deny from all

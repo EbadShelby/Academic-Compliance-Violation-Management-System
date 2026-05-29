@@ -40,6 +40,7 @@ require_once BASE_PATH . '/app/middleware/RoleMiddleware.php';
 
 // ── 6. Load helper files ─────────────────────────────────────────────────────
 require_once BASE_PATH . '/app/helpers/auth.php';
+require_once BASE_PATH . '/app/helpers/upload.php';   // Phase 9: upload utilities
 
 // Load additional helpers only if they are non-empty (skip empty stubs)
 $helpers = ['redirect.php', 'response.php', 'validation.php'];
