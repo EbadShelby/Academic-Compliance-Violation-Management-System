@@ -58,6 +58,14 @@ class ViolationController extends Controller
         return $this->model('ViolationAction');
     }
 
+    private function notificationService(): NotificationService
+    {
+        if (!class_exists('NotificationService', false)) {
+            require_once BASE_PATH . '/app/services/NotificationService.php';
+        }
+        return new NotificationService();
+    }
+
     // =========================================================================
     // GET /violations
     // =========================================================================
@@ -173,6 +181,11 @@ class ViolationController extends Controller
             'action_type'  => 'case_filed',
             'note'         => 'Violation report filed. Status set to Pending.',
         ]);
+
+        // Notifications
+        $ns = $this->notificationService();
+        $ns->notifyStudentViolationFiled((int) $data['student_id'], $violationId);
+        $ns->notifyAdminsNewViolation($violationId, $authUser['name'] ?? 'A teacher');
 
         Session::flash('success', 'Violation report submitted successfully.');
         $this->redirect(APP_URL . '/violations/' . $violationId);
@@ -315,6 +328,23 @@ class ViolationController extends Controller
             'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
         ]);
 
+        // Notifications
+        $ns           = $this->notificationService();
+        $statusLabel  = $statusLabels[$newStatus] ?? $newStatus;
+        $teacherId    = (int) ($violation['reported_by'] ?? 0);
+        $studentId    = (int) ($violation['student_id']  ?? 0);
+
+        if ($teacherId && $teacherId !== (int) $authUser['id']) {
+            $ns->notifyTeacherCaseReviewed($teacherId, $id, $statusLabel);
+        }
+        if ($studentId) {
+            if ($newStatus === 'resolved') {
+                $ns->notifyStudentCaseResolved($studentId, $id);
+            } else {
+                $ns->notifyStudentStatusUpdated($studentId, $id, $statusLabel);
+            }
+        }
+
         Session::flash('success', 'Case status updated to "' . ($statusLabels[$newStatus] ?? $newStatus) . '".');
         $this->redirect(APP_URL . '/violations/' . $id . '/review');
     }
@@ -380,6 +410,18 @@ class ViolationController extends Controller
             'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
         ]);
 
+        // Notifications
+        $ns        = $this->notificationService();
+        $teacherId = (int) ($violation['reported_by'] ?? 0);
+        $studentId = (int) ($violation['student_id']  ?? 0);
+
+        if ($teacherId && $teacherId !== (int) $authUser['id']) {
+            $ns->notifyTeacherCaseRejected($teacherId, $id, $reason);
+        }
+        if ($studentId) {
+            $ns->notifyStudentCaseRejected($studentId, $id);
+        }
+
         Session::flash('success', 'Case has been rejected.');
         $this->redirect(APP_URL . '/violations/' . $id . '/review');
     }
@@ -438,6 +480,18 @@ class ViolationController extends Controller
             'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
         ]);
 
+        // Notifications
+        $ns        = $this->notificationService();
+        $teacherId = (int) ($violation['reported_by'] ?? 0);
+        $studentId = (int) ($violation['student_id']  ?? 0);
+
+        if ($teacherId && $teacherId !== (int) $authUser['id']) {
+            $ns->notifyTeacherCaseClosed($teacherId, $id);
+        }
+        if ($studentId) {
+            $ns->notifyStudentCaseClosed($studentId, $id);
+        }
+
         Session::flash('success', 'Case has been closed. It is now read-only.');
         $this->redirect(APP_URL . '/violations/' . $id . '/review');
     }
@@ -492,6 +546,14 @@ class ViolationController extends Controller
             'ip_address'  => $_SERVER['REMOTE_ADDR']     ?? null,
             'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
         ]);
+
+        // Notifications
+        $ns        = $this->notificationService();
+        $teacherId = (int) ($violation['reported_by'] ?? 0);
+
+        if ($teacherId && $teacherId !== (int) $authUser['id']) {
+            $ns->notifyTeacherSanctionAssigned($teacherId, $id);
+        }
 
         Session::flash('success', 'Sanction notes have been saved.');
         $this->redirect(APP_URL . '/violations/' . $id . '/review');

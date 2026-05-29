@@ -223,6 +223,44 @@
         .flash-error   { background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.3); color: #f87171; }
         .flash-info    { background: rgba(99,102,241,.12);  border: 1px solid rgba(99,102,241,.3);  color: #a5b4fc; }
 
+        /* ── Notification bell ────────────────────────────────────────────── */
+        .notif-bell-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px; height: 36px;
+            background: none;
+            border: 1px solid var(--border-subtle);
+            border-radius: .5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 1.0625rem;
+            transition: background .15s, color .15s, border-color .15s;
+        }
+        .notif-bell-btn:hover {
+            background: rgba(255,255,255,.06);
+            border-color: rgba(165,180,252,.25);
+            color: #a5b4fc;
+        }
+        .notif-badge {
+            position: absolute;
+            top: -5px; right: -5px;
+            min-width: 18px; height: 18px;
+            padding: 0 4px;
+            background: #f87171;
+            border: 2px solid var(--surface-dark);
+            border-radius: 9px;
+            font-size: .6875rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            pointer-events: none;
+        }
+
         /* ── Responsive ────────────────────────────────────────────────────── */
         @media (max-width: 991.98px) {
             #sidebar           { transform: translateX(-100%); }
@@ -266,6 +304,28 @@
         </a>
         <a href="<?= APP_URL ?>/violations" class="nav-item-custom <?= (strpos($_SERVER['REQUEST_URI'], '/violations') !== false) ? 'active' : '' ?>">
             <i class="bi bi-exclamation-triangle"></i> Violations
+        </a>
+        <?php
+        // Notification sidebar link with unread badge
+        $_sidebarUser   = Session::user();
+        $_sidebarUnread = 0;
+        if ($_sidebarUser) {
+            try {
+                if (!class_exists('Notification', false)) {
+                    require_once BASE_PATH . '/app/models/Notification.php';
+                }
+                $_nm = new Notification();
+                $_sidebarUnread = $_nm->getUnreadCount((int) $_sidebarUser['id']);
+            } catch (Throwable $_e) {}
+        }
+        ?>
+        <a href="<?= APP_URL ?>/notifications" class="nav-item-custom <?= (strpos($_SERVER['REQUEST_URI'], '/notifications') !== false) ? 'active' : '' ?>" style="justify-content:space-between;">
+            <span style="display:flex;align-items:center;gap:.75rem;">
+                <i class="bi bi-bell"></i> Notifications
+            </span>
+            <?php if ($_sidebarUnread > 0): ?>
+            <span style="background:#f87171;color:#fff;font-size:.6875rem;font-weight:700;padding:1px 6px;border-radius:9px;"><?= $_sidebarUnread ?></span>
+            <?php endif; ?>
         </a>
     </div>
 
@@ -327,6 +387,23 @@
         <div class="topbar-right">
             <?php $authUser = $authUser ?? Session::user(); ?>
             <?php if ($authUser): ?>
+            <?php
+            // Topbar bell unread count
+            $_topbarUnread = 0;
+            try {
+                if (!class_exists('Notification', false)) {
+                    require_once BASE_PATH . '/app/models/Notification.php';
+                }
+                $_nmTop = new Notification();
+                $_topbarUnread = $_nmTop->getUnreadCount((int) $authUser['id']);
+            } catch (Throwable $_e) {}
+            ?>
+            <a href="<?= APP_URL ?>/notifications" class="notif-bell-btn" title="Notifications" id="notifBellBtn" aria-label="View notifications">
+                <i class="bi bi-bell<?= $_topbarUnread > 0 ? '-fill' : '' ?>"></i>
+                <?php if ($_topbarUnread > 0): ?>
+                <span class="notif-badge" id="notifBadgeTopbar"><?= $_topbarUnread ?></span>
+                <?php endif; ?>
+            </a>
             <span class="d-none d-sm-inline text-muted" style="font-size:.8125rem;">
                 <?= htmlspecialchars($authUser['name'] ?? '') ?>
             </span>

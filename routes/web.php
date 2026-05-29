@@ -51,3 +51,8 @@ $router->post('/violations/{id}/evidence',         'EvidenceController@upload');
 $router->get('/evidence/{id}',                     'EvidenceController@show');     // serve / download file
 $router->post('/evidence/{id}/delete',             'EvidenceController@delete');   // admin hard-delete
 
+// ── Notifications ─────────────────────────────────────────────────────────────
+$router->get('/notifications',                     'NotificationController@index');
+$router->post('/notifications/read-all',           'NotificationController@markAllRead');
+$router->post('/notifications/{id}/read',          'NotificationController@markRead');
+

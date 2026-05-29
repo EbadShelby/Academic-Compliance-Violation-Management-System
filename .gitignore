@@ -1,1 +1,21 @@
+# Environment / secrets
 .env
+.env.*
+
+# Uploaded evidence files (user data — never commit)
+storage/
+uploads/
+
+# PHP error logs
+*.log
+error_log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
