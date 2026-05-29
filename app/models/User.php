@@ -66,7 +66,7 @@ class User extends Model
 
         $sql = "SELECT u.id, u.first_name, u.last_name, u.email,
                        u.student_id, u.created_at, u.is_active,
-                       r.name AS role_name, r.slug AS role
+                       r.id AS role_id, r.name AS role_name, r.slug AS role
                 FROM `users` u
                 LEFT JOIN `roles` r ON r.id = u.role_id
                 ORDER BY u.created_at {$direction}";
@@ -88,5 +88,108 @@ class User extends Model
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $id]);
         return $stmt->fetch();
+    }
+
+    /**
+     * Check if an email already exists (optionally excluding a user by ID).
+     */
+    public function emailExists(string $email, int $excludeId = 0): bool
+    {
+        $sql  = "SELECT COUNT(*) FROM `users` WHERE email = :email AND id != :exclude";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':email' => $email, ':exclude' => $excludeId]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Check if a student_id already exists (optionally excluding a user by ID).
+     */
+    public function studentIdExists(string $studentId, int $excludeId = 0): bool
+    {
+        $sql  = "SELECT COUNT(*) FROM `users` WHERE student_id = :sid AND id != :exclude";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':sid' => $studentId, ':exclude' => $excludeId]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Create a new user, returning the new ID or false on failure.
+     */
+    public function createUser(array $data): int|false
+    {
+        $payload = [
+            'role_id'    => (int) $data['role_id'],
+            'first_name' => trim($data['first_name']),
+            'last_name'  => trim($data['last_name']),
+            'email'      => strtolower(trim($data['email'])),
+            'password'   => self::hashPassword($data['password']),
+            'student_id' => !empty($data['student_id']) ? trim($data['student_id']) : null,
+            'is_active'  => 1,
+        ];
+
+        return $this->insert($payload);
+    }
+
+    /**
+     * Update an existing user.
+     * Password is only updated when $data['password'] is non-empty.
+     */
+    public function updateUser(int $id, array $data): bool
+    {
+        $payload = [
+            'role_id'    => (int) $data['role_id'],
+            'first_name' => trim($data['first_name']),
+            'last_name'  => trim($data['last_name']),
+            'email'      => strtolower(trim($data['email'])),
+            'student_id' => !empty($data['student_id']) ? trim($data['student_id']) : null,
+            'is_active'  => isset($data['is_active']) ? (int) $data['is_active'] : 1,
+        ];
+
+        if (!empty($data['password'])) {
+            $payload['password'] = self::hashPassword($data['password']);
+        }
+
+        return $this->update($id, $payload);
+    }
+
+    /**
+     * Toggle active status for a user.
+     */
+    public function setActive(int $id, bool $active): bool
+    {
+        return $this->update($id, ['is_active' => $active ? 1 : 0]);
+    }
+
+    /**
+     * Reset a user's password.
+     */
+    public function resetPassword(int $id, string $newPassword): bool
+    {
+        return $this->update($id, ['password' => self::hashPassword($newPassword)]);
+    }
+
+    /**
+     * Count users grouped by role (for dashboard stats).
+     */
+    public function countByRole(): array
+    {
+        $sql = "SELECT r.slug, r.name, COUNT(u.id) AS total
+                FROM `roles` r
+                LEFT JOIN `users` u ON u.role_id = r.id
+                GROUP BY r.id";
+        return $this->query($sql)->fetchAll();
+    }
+
+    /**
+     * Fetch all students (role = student) for violation form selects.
+     */
+    public function allStudents(): array
+    {
+        $sql = "SELECT u.id, u.first_name, u.last_name, u.student_id
+                FROM `users` u
+                JOIN `roles` r ON r.id = u.role_id
+                WHERE r.slug = 'student' AND u.is_active = 1
+                ORDER BY u.last_name, u.first_name";
+        return $this->query($sql)->fetchAll();
     }
 }
