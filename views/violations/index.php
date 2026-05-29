@@ -85,10 +85,13 @@ $authUser = Session::user();
 .sev-major    { background: rgba(249,115,22,.15);   color: #f97316; }
 .sev-critical { background: rgba(248,113,113,.15);  color: #f87171; }
 
+.status-pending       { background: rgba(99,102,241,.15);  color: #a5b4fc; }
 .status-open          { background: rgba(99,102,241,.15);  color: #a5b4fc; }
 .status-under_review  { background: rgba(251,191,36,.15);  color: #fbbf24; }
 .status-resolved      { background: rgba(52,211,153,.15);  color: #34d399; }
-.status-dismissed     { background: rgba(148,163,184,.1);  color: #94a3b8; }
+.status-rejected      { background: rgba(248,113,113,.15); color: #f87171; }
+.status-dismissed     { background: rgba(248,113,113,.15); color: #f87171; }
+.status-closed        { background: rgba(148,163,184,.1);  color: #94a3b8; }
 
 .btn-view-link {
     display: inline-flex;
@@ -104,6 +107,21 @@ $authUser = Session::user();
     transition: background .15s;
 }
 .btn-view-link:hover { background: rgba(99,102,241,.25); color: #c7d2fe; }
+
+.btn-review-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .35rem .75rem;
+    border-radius: .5rem;
+    font-size: .8rem;
+    font-weight: 600;
+    color: #fbbf24;
+    background: rgba(251,191,36,.1);
+    text-decoration: none;
+    transition: background .15s;
+}
+.btn-review-link:hover { background: rgba(251,191,36,.22); color: #fde68a; }
 
 .empty-state {
     text-align: center;
@@ -201,9 +219,16 @@ $authUser = Session::user();
                 <td style="font-size:.825rem;color:var(--text-muted);"><?= htmlspecialchars($v['reporter_name'] ?? '—') ?></td>
                 <?php endif; ?>
                 <td>
+                    <div style="display:flex;align-items:center;gap:.4rem;">
                     <a href="<?= APP_URL ?>/violations/<?= $v['id'] ?>" class="btn-view-link">
                         <i class="bi bi-eye"></i> View
                     </a>
+                    <?php if (isAdmin()): ?>
+                    <a href="<?= APP_URL ?>/violations/<?= $v['id'] ?>/review" class="btn-review-link">
+                        <i class="bi bi-clipboard2-check"></i> Review
+                    </a>
+                    <?php endif; ?>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>

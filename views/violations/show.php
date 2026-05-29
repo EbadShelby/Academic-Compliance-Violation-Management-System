@@ -13,16 +13,22 @@ $sevClass = [
     'critical' => 'sev-critical',
 ];
 $statusClass = [
-    'open'         => 'status-open',
+    'pending'      => 'status-pending',
+    'open'         => 'status-pending',
     'under_review' => 'status-under_review',
     'resolved'     => 'status-resolved',
-    'dismissed'    => 'status-dismissed',
+    'rejected'     => 'status-rejected',
+    'dismissed'    => 'status-rejected',
+    'closed'       => 'status-closed',
 ];
 $statusLabel = [
-    'open'         => 'Open',
+    'pending'      => 'Pending',
+    'open'         => 'Pending',
     'under_review' => 'Under Review',
     'resolved'     => 'Resolved',
-    'dismissed'    => 'Dismissed',
+    'rejected'     => 'Rejected',
+    'dismissed'    => 'Rejected',
+    'closed'       => 'Closed',
 ];
 
 // MIME type → icon
@@ -94,10 +100,13 @@ function formatBytes(int $bytes): string {
 .sev-major    { background: rgba(249,115,22,.15);  color: #f97316; }
 .sev-critical { background: rgba(248,113,113,.15); color: #f87171; }
 
+.status-pending       { background: rgba(99,102,241,.15);  color: #a5b4fc; }
 .status-open          { background: rgba(99,102,241,.15);  color: #a5b4fc; }
 .status-under_review  { background: rgba(251,191,36,.15);  color: #fbbf24; }
 .status-resolved      { background: rgba(52,211,153,.15);  color: #34d399; }
-.status-dismissed     { background: rgba(148,163,184,.1);  color: #94a3b8; }
+.status-rejected      { background: rgba(248,113,113,.15); color: #f87171; }
+.status-dismissed     { background: rgba(248,113,113,.15); color: #f87171; }
+.status-closed        { background: rgba(148,163,184,.1);  color: #94a3b8; }
 
 /* Description block */
 .description-block {
@@ -287,6 +296,12 @@ function formatBytes(int $bytes): string {
                 Actions
             </div>
             <div class="detail-card-body d-flex flex-column gap-2">
+                <?php if (isAdmin()): ?>
+                <a href="<?= APP_URL ?>/violations/<?= $violation['id'] ?>/review"
+                   class="action-btn action-review">
+                    <i class="bi bi-clipboard2-check-fill"></i> Review &amp; Manage Case
+                </a>
+                <?php endif; ?>
                 <a href="<?= APP_URL ?>/violations/<?= $violation['id'] ?>/edit"
                    class="action-btn action-edit">
                     <i class="bi bi-pencil-square"></i> Edit Report
@@ -377,7 +392,8 @@ function formatBytes(int $bytes): string {
     transition: opacity .15s, transform .1s;
 }
 .action-btn:hover { opacity: .88; transform: translateY(-1px); }
-.action-edit   { background: rgba(79,70,229,.15);  color: #a5b4fc; border-color: rgba(79,70,229,.3); }
+.action-review { background: rgba(251,191,36,.12);  color: #fbbf24; border-color: rgba(251,191,36,.3); }
+.action-edit   { background: rgba(79,70,229,.15);   color: #a5b4fc; border-color: rgba(79,70,229,.3); }
 .action-new    { background: rgba(52,211,153,.1);   color: #34d399; border-color: rgba(52,211,153,.25); }
 .action-upload { background: rgba(6,182,212,.12);   color: #22d3ee; border-color: rgba(6,182,212,.3);  }
 

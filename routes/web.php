@@ -27,6 +27,13 @@ $router->get('/violations/{id}/edit', 'ViolationController@edit');
 $router->post('/violations/{id}',  'ViolationController@update');
 $router->post('/violations/{id}/delete', 'ViolationController@delete');
 
+// ── Case Management (admin) ───────────────────────────────────────────────────
+$router->get('/violations/{id}/review',   'ViolationController@review');
+$router->post('/violations/{id}/status',  'ViolationController@updateStatus');
+$router->post('/violations/{id}/reject',  'ViolationController@reject');
+$router->post('/violations/{id}/close',   'ViolationController@close');
+$router->post('/violations/{id}/sanction','ViolationController@assignSanction');
+
 // ── Admin — User Management ──────────────────────────────────────────────────
 $router->get('/admin/users',           'UserController@index');
 $router->get('/admin/users/create',    'UserController@create');

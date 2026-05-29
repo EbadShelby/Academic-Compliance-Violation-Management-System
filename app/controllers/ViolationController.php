@@ -3,16 +3,22 @@
 /**
  * Violation Controller
  *
- * Handles violation reporting for teachers (and admins with oversight).
+ * Handles violation reporting (teachers/admins) and full
+ * case management lifecycle (admins only).
  *
  * Routes:
- *   GET  /violations          → index()
- *   GET  /violations/create   → create()
- *   POST /violations          → store()
- *   GET  /violations/{id}     → show()
- *   GET  /violations/{id}/edit   → edit()   (stub for future phase)
- *   POST /violations/{id}        → update() (stub for future phase)
- *   POST /violations/{id}/delete → delete() (stub for future phase)
+ *   GET  /violations                    → index()
+ *   GET  /violations/create             → create()
+ *   POST /violations                    → store()
+ *   GET  /violations/{id}               → show()
+ *   GET  /violations/{id}/review        → review()        [admin]
+ *   POST /violations/{id}/status        → updateStatus()  [admin]
+ *   POST /violations/{id}/reject        → reject()        [admin]
+ *   POST /violations/{id}/close         → close()         [admin]
+ *   POST /violations/{id}/sanction      → assignSanction()[admin]
+ *   GET  /violations/{id}/edit          → edit()          (stub)
+ *   POST /violations/{id}               → update()        (stub)
+ *   POST /violations/{id}/delete        → delete()        (stub)
  */
 
 class ViolationController extends Controller
@@ -46,23 +52,28 @@ class ViolationController extends Controller
         return $this->model('AuditLog');
     }
 
+    private function actionModel(): ViolationAction
+    {
+        /** @var ViolationAction */
+        return $this->model('ViolationAction');
+    }
+
     // =========================================================================
     // GET /violations
     // =========================================================================
 
     /**
      * List all violations.
-     * Teachers see all; students see only their own (handled in view).
+     * Teachers see all; students see only their own.
      */
     public function index(): void
     {
         authorize(['admin', 'teacher', 'student']);
 
-        $vm         = $this->violationModel();
-        $authUser   = Session::user();
+        $vm       = $this->violationModel();
+        $authUser = Session::user();
 
         if ($authUser['role'] === 'student') {
-            // Students only see their own violations
             $violations = $vm->findByStudent((int) $authUser['id']);
         } else {
             $violations = $vm->allWithDetails();
@@ -79,9 +90,6 @@ class ViolationController extends Controller
     // GET /violations/create
     // =========================================================================
 
-    /**
-     * Show the violation-report form.
-     */
     public function create(): void
     {
         authorize(['teacher', 'admin']);
@@ -105,9 +113,6 @@ class ViolationController extends Controller
     // POST /violations
     // =========================================================================
 
-    /**
-     * Validate, save violation, handle uploads, write audit log.
-     */
     public function store(): void
     {
         authorize(['teacher', 'admin']);
@@ -116,7 +121,6 @@ class ViolationController extends Controller
         $data     = $this->collectInput();
         $errors   = $this->validateInput($data);
 
-        // ── File validation (doesn't block if no files uploaded) ─────────────
         $uploadedFiles = $this->collectUploadedFiles();
         $fileErrors    = $this->validateFiles($uploadedFiles);
         $errors        = array_merge($errors, $fileErrors);
@@ -127,9 +131,7 @@ class ViolationController extends Controller
             $this->redirect(APP_URL . '/violations/create');
         }
 
-        // ── Save violation ───────────────────────────────────────────────────
-        $vm = $this->violationModel();
-
+        $vm          = $this->violationModel();
         $violationId = $vm->createViolation([
             'student_id'    => $data['student_id'],
             'reported_by'   => $authUser['id'],
@@ -145,12 +147,11 @@ class ViolationController extends Controller
             $this->redirect(APP_URL . '/violations/create');
         }
 
-        // ── Handle file uploads ──────────────────────────────────────────────
         if (!empty($uploadedFiles)) {
             $this->processUploads($uploadedFiles, $violationId, (int) $authUser['id']);
         }
 
-        // ── Audit log ────────────────────────────────────────────────────────
+        // Audit log
         $this->auditModel()->createLog([
             'user_id'     => $authUser['id'],
             'action'      => 'violation.created',
@@ -161,8 +162,16 @@ class ViolationController extends Controller
                 'severity'   => $data['severity'],
                 'student_id' => $data['student_id'],
             ],
-            'ip_address'  => $_SERVER['REMOTE_ADDR']      ?? null,
-            'user_agent'  => $_SERVER['HTTP_USER_AGENT']  ?? null,
+            'ip_address'  => $_SERVER['REMOTE_ADDR']     ?? null,
+            'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        ]);
+
+        // Violation action record
+        $this->actionModel()->createAction([
+            'violation_id' => $violationId,
+            'actor_id'     => $authUser['id'],
+            'action_type'  => 'case_filed',
+            'note'         => 'Violation report filed. Status set to Pending.',
         ]);
 
         Session::flash('success', 'Violation report submitted successfully.');
@@ -173,9 +182,6 @@ class ViolationController extends Controller
     // GET /violations/{id}
     // =========================================================================
 
-    /**
-     * Show a single violation detail page.
-     */
     public function show(int $id): void
     {
         authorize(['admin', 'teacher', 'student']);
@@ -188,23 +194,311 @@ class ViolationController extends Controller
 
         $authUser = Session::user();
 
-        // Students may only view their own violations
         if ($authUser['role'] === 'student' && $violation['student_id'] != $authUser['id']) {
             $this->abort(403, 'You are not authorised to view this record.');
         }
 
         $evidenceFiles = $this->evidenceModel()->findByViolation($id);
+        $actions       = $this->actionModel()->findByViolation($id);
 
         $this->view('violations.show', [
             'title'         => 'Violation #' . $id . ' — ' . APP_NAME,
             'pageTitle'     => 'Violation Report',
             'violation'     => $violation,
             'evidenceFiles' => $evidenceFiles,
+            'actions'       => $actions,
         ]);
     }
 
     // =========================================================================
-    // GET /violations/{id}/edit  (stub — future phase)
+    // GET /violations/{id}/review   [admin only]
+    // =========================================================================
+
+    /**
+     * Full case review page for admins.
+     * Shows all case details, evidence, action history, and workflow controls.
+     */
+    public function review(int $id): void
+    {
+        authorize(['admin']);
+
+        $vm        = $this->violationModel();
+        $violation = $vm->findWithDetails($id);
+
+        if (!$violation) {
+            $this->abort(404, 'Violation not found.');
+        }
+
+        $evidenceFiles       = $this->evidenceModel()->findByViolation($id);
+        $actions             = $this->actionModel()->findByViolation($id);
+        $availableTransitions = $vm->getAvailableTransitions($violation['status']);
+        $statusLabels        = $vm->getStatusLabels();
+
+        $this->view('violations.review', [
+            'title'                => 'Review Case #' . $id . ' — ' . APP_NAME,
+            'pageTitle'            => 'Case Review',
+            'violation'            => $violation,
+            'evidenceFiles'        => $evidenceFiles,
+            'actions'              => $actions,
+            'availableTransitions' => $availableTransitions,
+            'statusLabels'         => $statusLabels,
+            'errors'               => Session::getFlash('errors') ?? [],
+            'success'              => Session::getFlash('success') ?? null,
+            'error'                => Session::getFlash('error')   ?? null,
+        ]);
+    }
+
+    // =========================================================================
+    // POST /violations/{id}/status  [admin only]
+    // =========================================================================
+
+    /**
+     * Move a violation through the workflow state machine.
+     * Blocks invalid transitions server-side.
+     */
+    public function updateStatus(int $id): void
+    {
+        authorize(['admin']);
+
+        $vm        = $this->violationModel();
+        $violation = $vm->findWithDetails($id);
+
+        if (!$violation) {
+            $this->abort(404, 'Violation not found.');
+        }
+
+        $newStatus = trim($_POST['new_status'] ?? '');
+        $authUser  = Session::user();
+
+        // Server-side transition validation
+        if (!$vm->isValidTransition($violation['status'], $newStatus)) {
+            Session::flash('error', sprintf(
+                'Invalid status transition: cannot move from "%s" to "%s".',
+                ucfirst(str_replace('_', ' ', $violation['status'])),
+                ucfirst(str_replace('_', ' ', $newStatus))
+            ));
+            $this->redirect(APP_URL . '/violations/' . $id . '/review');
+        }
+
+        // Guard: rejection requires going through the reject() action
+        if ($newStatus === 'rejected') {
+            Session::flash('error', 'Use the "Reject Case" form to reject a violation (reason is required).');
+            $this->redirect(APP_URL . '/violations/' . $id . '/review');
+        }
+
+        $oldStatus = $violation['status'];
+        $vm->updateStatus($id, $newStatus);
+
+        $statusLabels = $vm->getStatusLabels();
+        $note = sprintf(
+            'Status changed from "%s" to "%s".',
+            $statusLabels[$oldStatus] ?? $oldStatus,
+            $statusLabels[$newStatus] ?? $newStatus
+        );
+
+        // Violation action history
+        $this->actionModel()->createAction([
+            'violation_id' => $id,
+            'actor_id'     => $authUser['id'],
+            'action_type'  => 'status_changed',
+            'note'         => $note,
+        ]);
+
+        // Audit log
+        $this->auditModel()->createLog([
+            'user_id'     => $authUser['id'],
+            'action'      => 'violation.status_changed',
+            'target_type' => 'Violation',
+            'target_id'   => $id,
+            'detail'      => ['from' => $oldStatus, 'to' => $newStatus],
+            'ip_address'  => $_SERVER['REMOTE_ADDR']     ?? null,
+            'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        ]);
+
+        Session::flash('success', 'Case status updated to "' . ($statusLabels[$newStatus] ?? $newStatus) . '".');
+        $this->redirect(APP_URL . '/violations/' . $id . '/review');
+    }
+
+    // =========================================================================
+    // POST /violations/{id}/reject  [admin only]
+    // =========================================================================
+
+    /**
+     * Reject a violation case. Requires a non-empty rejection reason.
+     * Only valid from 'under_review' status.
+     */
+    public function reject(int $id): void
+    {
+        authorize(['admin']);
+
+        $vm        = $this->violationModel();
+        $violation = $vm->findWithDetails($id);
+
+        if (!$violation) {
+            $this->abort(404, 'Violation not found.');
+        }
+
+        $reason   = trim($_POST['rejection_reason'] ?? '');
+        $authUser = Session::user();
+
+        // Rejection reason is mandatory
+        if ($reason === '') {
+            Session::flash('error', 'A rejection reason is required.');
+            $this->redirect(APP_URL . '/violations/' . $id . '/review');
+        }
+
+        // Must be in 'under_review' to reject
+        if (!$vm->isValidTransition($violation['status'], 'rejected')) {
+            Session::flash('error', sprintf(
+                'Cannot reject a case that is currently "%s". Move it to "Under Review" first.',
+                ucfirst(str_replace('_', ' ', $violation['status']))
+            ));
+            $this->redirect(APP_URL . '/violations/' . $id . '/review');
+        }
+
+        $oldStatus = $violation['status'];
+
+        $vm->updateStatus($id, 'rejected');
+        $vm->addRejectionReason($id, $reason);
+
+        $note = 'Case rejected. Reason: ' . $reason;
+
+        $this->actionModel()->createAction([
+            'violation_id' => $id,
+            'actor_id'     => $authUser['id'],
+            'action_type'  => 'case_rejected',
+            'note'         => $note,
+        ]);
+
+        $this->auditModel()->createLog([
+            'user_id'     => $authUser['id'],
+            'action'      => 'violation.rejected',
+            'target_type' => 'Violation',
+            'target_id'   => $id,
+            'detail'      => ['from' => $oldStatus, 'to' => 'rejected', 'reason' => $reason],
+            'ip_address'  => $_SERVER['REMOTE_ADDR']     ?? null,
+            'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        ]);
+
+        Session::flash('success', 'Case has been rejected.');
+        $this->redirect(APP_URL . '/violations/' . $id . '/review');
+    }
+
+    // =========================================================================
+    // POST /violations/{id}/close  [admin only]
+    // =========================================================================
+
+    /**
+     * Close a violation case.
+     * Only valid when status is 'resolved' or 'rejected'.
+     */
+    public function close(int $id): void
+    {
+        authorize(['admin']);
+
+        $vm        = $this->violationModel();
+        $violation = $vm->findWithDetails($id);
+
+        if (!$violation) {
+            $this->abort(404, 'Violation not found.');
+        }
+
+        $authUser = Session::user();
+
+        if (!$vm->isValidTransition($violation['status'], 'closed')) {
+            Session::flash('error', sprintf(
+                'Cannot close a case that is currently "%s". Only resolved or rejected cases can be closed.',
+                ucfirst(str_replace('_', ' ', $violation['status']))
+            ));
+            $this->redirect(APP_URL . '/violations/' . $id . '/review');
+        }
+
+        $oldStatus = $violation['status'];
+        $vm->updateStatus($id, 'closed');
+
+        $note = sprintf(
+            'Case closed (was "%s"). No further changes are permitted.',
+            ucfirst(str_replace('_', ' ', $oldStatus))
+        );
+
+        $this->actionModel()->createAction([
+            'violation_id' => $id,
+            'actor_id'     => $authUser['id'],
+            'action_type'  => 'case_closed',
+            'note'         => $note,
+        ]);
+
+        $this->auditModel()->createLog([
+            'user_id'     => $authUser['id'],
+            'action'      => 'violation.closed',
+            'target_type' => 'Violation',
+            'target_id'   => $id,
+            'detail'      => ['from' => $oldStatus, 'to' => 'closed'],
+            'ip_address'  => $_SERVER['REMOTE_ADDR']     ?? null,
+            'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        ]);
+
+        Session::flash('success', 'Case has been closed. It is now read-only.');
+        $this->redirect(APP_URL . '/violations/' . $id . '/review');
+    }
+
+    // =========================================================================
+    // POST /violations/{id}/sanction  [admin only]
+    // =========================================================================
+
+    /**
+     * Assign or update sanction notes on a violation.
+     * Can be done at any non-closed status.
+     */
+    public function assignSanction(int $id): void
+    {
+        authorize(['admin']);
+
+        $vm        = $this->violationModel();
+        $violation = $vm->findWithDetails($id);
+
+        if (!$violation) {
+            $this->abort(404, 'Violation not found.');
+        }
+
+        if ($violation['status'] === 'closed') {
+            Session::flash('error', 'Cannot modify a closed case.');
+            $this->redirect(APP_URL . '/violations/' . $id . '/review');
+        }
+
+        $notes    = trim($_POST['sanction_notes'] ?? '');
+        $authUser = Session::user();
+
+        if ($notes === '') {
+            Session::flash('error', 'Sanction notes cannot be empty.');
+            $this->redirect(APP_URL . '/violations/' . $id . '/review');
+        }
+
+        $vm->assignSanction($id, $notes);
+
+        $this->actionModel()->createAction([
+            'violation_id' => $id,
+            'actor_id'     => $authUser['id'],
+            'action_type'  => 'sanction_assigned',
+            'note'         => 'Sanction assigned: ' . mb_substr($notes, 0, 120) . (mb_strlen($notes) > 120 ? '…' : ''),
+        ]);
+
+        $this->auditModel()->createLog([
+            'user_id'     => $authUser['id'],
+            'action'      => 'violation.sanction_assigned',
+            'target_type' => 'Violation',
+            'target_id'   => $id,
+            'detail'      => ['sanction_notes' => $notes],
+            'ip_address'  => $_SERVER['REMOTE_ADDR']     ?? null,
+            'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        ]);
+
+        Session::flash('success', 'Sanction notes have been saved.');
+        $this->redirect(APP_URL . '/violations/' . $id . '/review');
+    }
+
+    // =========================================================================
+    // GET /violations/{id}/edit  (stub)
     // =========================================================================
 
     public function edit(int $id): void
@@ -230,7 +524,7 @@ class ViolationController extends Controller
     }
 
     // =========================================================================
-    // POST /violations/{id}  (stub — future phase)
+    // POST /violations/{id}  (stub)
     // =========================================================================
 
     public function update(int $id): void
@@ -242,7 +536,7 @@ class ViolationController extends Controller
     }
 
     // =========================================================================
-    // POST /violations/{id}/delete  (stub — future phase)
+    // POST /violations/{id}/delete  (stub)
     // =========================================================================
 
     public function delete(int $id): void
@@ -257,9 +551,6 @@ class ViolationController extends Controller
     // Private helpers
     // =========================================================================
 
-    /**
-     * Collect and sanitise POST fields.
-     */
     private function collectInput(): array
     {
         return [
@@ -271,9 +562,6 @@ class ViolationController extends Controller
         ];
     }
 
-    /**
-     * Server-side validation for the create form.
-     */
     private function validateInput(array $data): array
     {
         $errors = [];
@@ -310,10 +598,6 @@ class ViolationController extends Controller
         return $errors;
     }
 
-    /**
-     * Collect all uploaded files from $_FILES['evidence'].
-     * Delegates to the shared upload helper (app/helpers/upload.php).
-     */
     private function collectUploadedFiles(): array
     {
         if (empty($_FILES['evidence'])) {
@@ -322,11 +606,6 @@ class ViolationController extends Controller
         return upload_normalise_files($_FILES['evidence']);
     }
 
-    /**
-     * Validate all uploaded files.
-     * Delegates to upload_validate_file() in app/helpers/upload.php.
-     * Returns a flat array of error strings.
-     */
     private function validateFiles(array $files): array
     {
         $errors = [];
@@ -339,10 +618,6 @@ class ViolationController extends Controller
         return $errors;
     }
 
-    /**
-     * Move uploaded files to storage/uploads/evidence/ and insert evidence records.
-     * Delegates file moving and path generation to app/helpers/upload.php.
-     */
     private function processUploads(array $files, int $violationId, int $uploaderId): void
     {
         $evidenceModel = $this->evidenceModel();
@@ -374,9 +649,6 @@ class ViolationController extends Controller
         }
     }
 
-    /**
-     * Basic date format validation (YYYY-MM-DD).
-     */
     private function isValidDate(string $date): bool
     {
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
