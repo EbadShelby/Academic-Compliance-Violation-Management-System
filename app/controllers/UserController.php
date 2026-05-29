@@ -123,6 +123,12 @@ class UserController extends Controller
             $this->redirect(APP_URL . '/admin/users/create');
         }
 
+        // Audit log
+        logAction('user.created', 'User', $newId, [
+            'email'   => $data['email'],
+            'role_id' => $data['role_id'],
+        ]);
+
         Session::flash('success', 'User created successfully.');
         $this->redirect(APP_URL . '/admin/users/' . $newId);
     }
@@ -225,6 +231,12 @@ class UserController extends Controller
 
         $userModel->updateUser($id, $data);
 
+        // Audit log
+        logAction('user.updated', 'User', $id, [
+            'email'   => $data['email'],
+            'role_id' => $data['role_id'],
+        ]);
+
         Session::flash('success', 'User updated successfully.');
         $this->redirect(APP_URL . '/admin/users/' . $id);
     }
@@ -254,11 +266,13 @@ class UserController extends Controller
         switch ($action) {
             case 'deactivate':
                 $userModel->setActive($id, false);
+                logAction('user.deactivated', 'User', $id, ['target_email' => $user['email'] ?? null]);
                 Session::flash('success', 'User account has been deactivated.');
                 break;
 
             case 'reactivate':
                 $userModel->setActive($id, true);
+                logAction('user.reactivated', 'User', $id, ['target_email' => $user['email'] ?? null]);
                 Session::flash('success', 'User account has been reactivated.');
                 break;
 
@@ -272,6 +286,7 @@ class UserController extends Controller
                 }
 
                 $userModel->resetPassword($id, $newPassword);
+                logAction('user.password_reset', 'User', $id, ['target_email' => $user['email'] ?? null]);
                 Session::flash('success', 'Password has been reset successfully.');
                 break;
 

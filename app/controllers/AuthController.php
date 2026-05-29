@@ -4,6 +4,7 @@
  * Auth Controller
  *
  * Handles login, logout, and session establishment.
+ * Every authentication event is logged to the audit trail.
  */
 
 class AuthController extends Controller
@@ -65,12 +66,20 @@ class AuthController extends Controller
         // Use a generic message for both "user not found" and "wrong password"
         // to prevent user enumeration.
         if (!$user || !$userModel->verifyPassword($password, $user['password'])) {
+            // Log failed login attempt (user_id is null — not authenticated)
+            logAction('auth.login_failed', 'User', null, ['email' => $email], null);
+
             Session::flash('error', 'Invalid email or password. Please try again.');
             $this->redirect(APP_URL . '/login');
         }
 
         // ── 5. Check account status ──────────────────────────────────────────
         if (isset($user['is_active']) && (int) $user['is_active'] === 0) {
+            logAction('auth.login_blocked', 'User', (int) $user['id'], [
+                'reason' => 'account_deactivated',
+                'email'  => $email,
+            ], (int) $user['id']);
+
             Session::flash('error', 'Your account has been deactivated. Please contact an administrator.');
             $this->redirect(APP_URL . '/login');
         }
@@ -84,7 +93,13 @@ class AuthController extends Controller
             'name'    => trim($user['first_name'] . ' ' . $user['last_name']),
         ]);
 
-        // ── 7. Redirect based on role ────────────────────────────────────────
+        // ── 7. Log successful login ──────────────────────────────────────────
+        logAction('auth.login', 'User', (int) $user['id'], [
+            'email' => $user['email'],
+            'role'  => $user['role'] ?? 'student',
+        ], (int) $user['id']);
+
+        // ── 8. Redirect based on role ────────────────────────────────────────
         $role = strtolower($user['role'] ?? 'student');
 
         if ($role === 'admin') {
@@ -106,6 +121,14 @@ class AuthController extends Controller
      */
     public function logout(): void
     {
+        // Log before destroying the session so we still have user_id
+        $user = Session::user();
+        if ($user) {
+            logAction('auth.logout', 'User', (int) $user['id'], [
+                'email' => $user['email'] ?? null,
+            ], (int) $user['id']);
+        }
+
         Session::logout();
         Session::flash('success', 'You have been logged out successfully.');
         $this->redirect(APP_URL . '/login');
