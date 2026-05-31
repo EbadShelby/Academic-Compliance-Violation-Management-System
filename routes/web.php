@@ -56,3 +56,7 @@ $router->get('/notifications',                     'NotificationController@index
 $router->post('/notifications/read-all',           'NotificationController@markAllRead');
 $router->post('/notifications/{id}/read',          'NotificationController@markRead');
 
+// ── AI Features ───────────────────────────────────────────────────────────────
+$router->post('/ai/assess-severity',               'AIController@assess');           // Phase 1: AI severity assessment
+$router->post('/ai/classify-category',             'AIController@classifyCategory'); // Phase 2: AI category suggestion
+$router->post('/ai/summarize-case',                'AIController@summarizeCase');    // Phase 3: AI case summary (admin)

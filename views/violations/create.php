@@ -123,6 +123,47 @@
                                 <?php if (isset($errors['type'])): ?>
                                 <div class="field-error"><?= htmlspecialchars($errors['type']) ?></div>
                                 <?php endif; ?>
+
+                                <!-- ── AI Category Suggestion ────────── -->
+                                <div class="ai-cat-assess-wrap mt-2">
+                                    <button type="button" id="aiCatBtn" class="btn-ai-cat">
+                                        <i class="bi bi-stars"></i>
+                                        <span id="aiCatBtnText">AI Suggest Category</span>
+                                    </button>
+                                </div>
+                                <!-- AI category result card -->
+                                <div id="aiCatResultCard" class="ai-cat-result-card" style="display:none;" aria-live="polite">
+                                    <div id="aiCatLoading" class="ai-loading" style="display:none;">
+                                        <div class="ai-spinner"></div>
+                                        <span>Classifying violation…</span>
+                                    </div>
+                                    <div id="aiCatError" class="ai-error" style="display:none;">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        <span id="aiCatErrorText"></span>
+                                    </div>
+                                    <div id="aiCatSuccess" style="display:none;">
+                                        <div class="ai-result-header">
+                                            <i class="bi bi-stars ai-icon"></i>
+                                            <span class="ai-result-label">AI Category Suggestion</span>
+                                            <span id="aiCatConfPill" class="ai-confidence-pill"></span>
+                                        </div>
+                                        <div class="ai-result-body">
+                                            <div class="ai-suggested-severity">
+                                                <span class="ai-sev-prefix">Suggested:</span>
+                                                <span id="aiCatBadge" class="ai-cat-badge"></span>
+                                            </div>
+                                            <p id="aiCatReasoning" class="ai-reasoning"></p>
+                                        </div>
+                                        <div class="ai-result-actions">
+                                            <button type="button" id="aiCatAcceptBtn" class="btn-ai-accept">
+                                                <i class="bi bi-check2-circle"></i> Apply to Category Field
+                                            </button>
+                                            <button type="button" id="aiCatDismissBtn" class="btn-ai-dismiss">
+                                                Dismiss
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Severity -->
@@ -148,7 +189,7 @@
                         </div>
 
                         <!-- Description -->
-                        <div class="mb-0">
+                        <div class="mb-3">
                             <label for="description" class="form-label-custom">
                                 Violation Description <span class="text-danger">*</span>
                             </label>
@@ -163,6 +204,54 @@
                                 <div class="field-hint">Minimum 20 characters. Be factual and objective.</div>
                                 <?php endif; ?>
                                 <small class="text-muted" id="descCounter">0 / 5000</small>
+                            </div>
+                        </div>
+
+                        <!-- ── AI Severity Assessment ──────────────────────── -->
+                        <div class="ai-assess-wrap">
+                            <button type="button" id="aiAssessBtn" class="btn-ai-assess">
+                                <i class="bi bi-stars"></i>
+                                <span id="aiAssessBtnText">AI Assess Severity</span>
+                            </button>
+                            <span class="ai-hint-text">Let AI suggest a severity level based on your description</span>
+                        </div>
+
+                        <!-- AI result card (hidden until response) -->
+                        <div id="aiResultCard" class="ai-result-card" style="display:none;" aria-live="polite">
+                            <!-- Loading state -->
+                            <div id="aiLoading" class="ai-loading" style="display:none;">
+                                <div class="ai-spinner"></div>
+                                <span>Analysing violation description…</span>
+                            </div>
+
+                            <!-- Error state -->
+                            <div id="aiError" class="ai-error" style="display:none;">
+                                <i class="bi bi-exclamation-circle"></i>
+                                <span id="aiErrorText"></span>
+                            </div>
+
+                            <!-- Success state -->
+                            <div id="aiSuccess" style="display:none;">
+                                <div class="ai-result-header">
+                                    <i class="bi bi-stars ai-icon"></i>
+                                    <span class="ai-result-label">AI Severity Suggestion</span>
+                                    <span id="aiConfidencePill" class="ai-confidence-pill"></span>
+                                </div>
+                                <div class="ai-result-body">
+                                    <div class="ai-suggested-severity">
+                                        <span class="ai-sev-prefix">Suggested:</span>
+                                        <span id="aiSeverityBadge" class="ai-severity-badge"></span>
+                                    </div>
+                                    <p id="aiReasoning" class="ai-reasoning"></p>
+                                </div>
+                                <div class="ai-result-actions">
+                                    <button type="button" id="aiAcceptBtn" class="btn-ai-accept">
+                                        <i class="bi bi-check2-circle"></i> Apply to Severity Field
+                                    </button>
+                                    <button type="button" id="aiDismissBtn" class="btn-ai-dismiss">
+                                        Dismiss
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -437,6 +526,230 @@ textarea.form-control-custom { resize: vertical; min-height: 120px; line-height:
 .sev-major    { background: rgba(249,115,22,.15);  color: #f97316; }
 .sev-critical { background: rgba(248,113,113,.15); color: #f87171; }
 
+/* ── AI Severity Assessment ───────────────────────────────────────────────── */
+.ai-assess-wrap {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+}
+.btn-ai-assess {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem 1rem;
+    background: linear-gradient(135deg, rgba(139,92,246,.25), rgba(79,70,229,.2));
+    border: 1px solid rgba(139,92,246,.4);
+    border-radius: .625rem;
+    color: #c4b5fd;
+    font-size: .875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+}
+.btn-ai-assess:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(139,92,246,.4), rgba(79,70,229,.35));
+    border-color: rgba(139,92,246,.7);
+    color: #ddd6fe;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(139,92,246,.2);
+}
+.btn-ai-assess:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+.btn-ai-assess .bi-stars { font-size: 1rem; }
+.ai-hint-text {
+    font-size: .775rem;
+    color: var(--text-muted);
+    opacity: .8;
+}
+
+/* Result card */
+.ai-result-card {
+    margin-top: .75rem;
+    border: 1px solid rgba(139,92,246,.35);
+    border-radius: .75rem;
+    background: rgba(139,92,246,.07);
+    overflow: hidden;
+    animation: aiSlideIn .25s ease;
+}
+@keyframes aiSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.ai-loading {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 1rem 1.25rem;
+    color: #c4b5fd;
+    font-size: .875rem;
+}
+.ai-spinner {
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 2px solid rgba(196,181,253,.3);
+    border-top-color: #c4b5fd;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-error {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .875rem 1.25rem;
+    color: #f87171;
+    font-size: .875rem;
+}
+.ai-result-header {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid rgba(139,92,246,.2);
+}
+.ai-icon { color: #a78bfa; font-size: 1.1rem; }
+.ai-result-label {
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #a78bfa;
+    flex: 1;
+}
+.ai-confidence-pill {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: .15rem .55rem;
+    border-radius: 999px;
+}
+.conf-high   { background: rgba(52,211,153,.2); color: #34d399; border: 1px solid rgba(52,211,153,.3); }
+.conf-medium { background: rgba(251,191,36,.2); color: #fbbf24; border: 1px solid rgba(251,191,36,.3); }
+.conf-low    { background: rgba(249,115,22,.2); color: #f97316; border: 1px solid rgba(249,115,22,.3); }
+.ai-result-body { padding: .875rem 1.25rem; }
+.ai-suggested-severity {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: .625rem;
+}
+.ai-sev-prefix { font-size: .8rem; color: var(--text-muted); }
+.ai-severity-badge {
+    padding: .25rem .75rem;
+    border-radius: .4rem;
+    font-weight: 700;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+}
+.ai-reasoning {
+    font-size: .825rem;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.55;
+    font-style: italic;
+}
+.ai-result-actions {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .75rem 1.25rem;
+    border-top: 1px solid rgba(139,92,246,.2);
+}
+.btn-ai-accept {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem .95rem;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border: none;
+    border-radius: .5rem;
+    color: #fff;
+    font-size: .8125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+}
+.btn-ai-accept:hover { opacity: .88; transform: translateY(-1px); }
+.btn-ai-dismiss {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: .8rem;
+    cursor: pointer;
+    padding: .3rem .6rem;
+    border-radius: .375rem;
+    transition: color .15s;
+}
+.btn-ai-dismiss:hover { color: var(--text-primary); }
+
+/* AI Category button (Phase 2) */
+.ai-cat-assess-wrap {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.btn-ai-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .35rem .85rem;
+    background: linear-gradient(135deg, rgba(6,182,212,.2), rgba(14,165,233,.15));
+    border: 1px solid rgba(6,182,212,.35);
+    border-radius: .5rem;
+    color: #67e8f9;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+}
+.btn-ai-cat:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(6,182,212,.35), rgba(14,165,233,.3));
+    border-color: rgba(6,182,212,.6);
+    color: #a5f3fc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(6,182,212,.15);
+}
+.btn-ai-cat:disabled { opacity: .6; cursor: not-allowed; }
+.btn-ai-cat .bi-stars { font-size: .9rem; }
+
+.ai-cat-result-card {
+    margin-top: .5rem;
+    border: 1px solid rgba(6,182,212,.3);
+    border-radius: .75rem;
+    background: rgba(6,182,212,.06);
+    overflow: hidden;
+    animation: aiSlideIn .25s ease;
+}
+.ai-cat-badge {
+    padding: .2rem .65rem;
+    border-radius: .375rem;
+    font-weight: 700;
+    font-size: .78rem;
+    text-transform: none;
+    letter-spacing: .02em;
+    background: rgba(6,182,212,.18);
+    color: #67e8f9;
+    border: 1px solid rgba(6,182,212,.3);
+}
+
+/* Flash animation when AI suggestion is accepted */
+@keyframes aiAcceptPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(52,211,153,.5); border-color: #34d399; }
+    60%  { box-shadow: 0 0 0 6px rgba(52,211,153,0); border-color: #34d399; }
+    100% { box-shadow: none; border-color: var(--border-subtle); }
+}
+.ai-accepted-flash {
+    animation: aiAcceptPulse 1.1s ease forwards;
+}
+
 /* Submit / cancel */
 .btn-submit-primary {
     display: inline-flex;
@@ -512,8 +825,218 @@ textarea.form-control-custom { resize: vertical; min-height: 120px; line-height:
     desc && desc.addEventListener('input', updateCounter);
     updateCounter();
 
+    // ── AI Severity Assessment ─────────────────────────────────────────────
+    const aiAssessBtn    = document.getElementById('aiAssessBtn');
+    const aiAssessBtnTxt = document.getElementById('aiAssessBtnText');
+    const aiResultCard   = document.getElementById('aiResultCard');
+    const aiLoading      = document.getElementById('aiLoading');
+    const aiError        = document.getElementById('aiError');
+    const aiErrorText    = document.getElementById('aiErrorText');
+    const aiSuccess      = document.getElementById('aiSuccess');
+    const aiSeverityBadge = document.getElementById('aiSeverityBadge');
+    const aiConfPill     = document.getElementById('aiConfidencePill');
+    const aiReasoning    = document.getElementById('aiReasoning');
+    const aiAcceptBtn    = document.getElementById('aiAcceptBtn');
+    const aiDismissBtn   = document.getElementById('aiDismissBtn');
+    const sevSelect      = document.getElementById('severity');
+    const typeSelect     = document.getElementById('type');
+
+    let lastSuggestedSeverity = null;
+
+    const severityLabels = { minor: 'Minor', moderate: 'Moderate', major: 'Major', critical: 'Critical' };
+    const severityClasses = { minor: 'sev-minor', moderate: 'sev-moderate', major: 'sev-major', critical: 'sev-critical' };
+    const confidenceClasses = { high: 'conf-high', medium: 'conf-medium', low: 'conf-low' };
+
+    function showAiState(state) {
+        aiResultCard.style.display = 'block';
+        aiLoading.style.display = state === 'loading' ? 'flex' : 'none';
+        aiError.style.display   = state === 'error'   ? 'flex' : 'none';
+        aiSuccess.style.display = state === 'success' ? 'block' : 'none';
+    }
+
+    function hideAiCard() {
+        aiResultCard.style.display = 'none';
+        lastSuggestedSeverity = null;
+    }
+
+    aiAssessBtn && aiAssessBtn.addEventListener('click', async function () {
+        const description = desc ? desc.value.trim() : '';
+        const type        = typeSelect ? typeSelect.value : '';
+
+        if (description.length < 20) {
+            showAiState('error');
+            aiErrorText.textContent = 'Please write at least 20 characters in the description before assessing.';
+            return;
+        }
+
+        // Set button loading state
+        aiAssessBtn.disabled = true;
+        aiAssessBtnTxt.textContent = 'Analysing…';
+        showAiState('loading');
+
+        try {
+            const response = await fetch('<?= APP_URL ?>/ai/assess-severity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ description, type })
+            });
+
+            const json = await response.json();
+
+            if (!json.success) {
+                showAiState('error');
+                aiErrorText.textContent = json.error || 'AI assessment failed. Please try again.';
+                return;
+            }
+
+            const { severity, confidence, reasoning } = json.data;
+            lastSuggestedSeverity = severity;
+
+            // Populate success card
+            aiSeverityBadge.textContent = severityLabels[severity] || severity;
+            aiSeverityBadge.className   = 'ai-severity-badge ' + (severityClasses[severity] || '');
+
+            aiConfPill.textContent = (confidence || 'medium').charAt(0).toUpperCase() + (confidence || 'medium').slice(1) + ' confidence';
+            aiConfPill.className   = 'ai-confidence-pill ' + (confidenceClasses[confidence] || 'conf-medium');
+
+            aiReasoning.textContent = reasoning || '';
+
+            showAiState('success');
+
+        } catch (err) {
+            showAiState('error');
+            aiErrorText.textContent = 'Network error. Please check your connection and try again.';
+            console.error('AI assess error:', err);
+        } finally {
+            aiAssessBtn.disabled = false;
+            aiAssessBtnTxt.textContent = 'AI Assess Severity';
+        }
+    });
+
+    // Accept button: apply suggested severity to the form select
+    aiAcceptBtn && aiAcceptBtn.addEventListener('click', function () {
+        if (!lastSuggestedSeverity || !sevSelect) return;
+        sevSelect.value = lastSuggestedSeverity;
+        // Trigger the existing severity badge preview update
+        sevSelect.dispatchEvent(new Event('change'));
+        // Visual feedback on the select
+        sevSelect.classList.add('ai-accepted-flash');
+        setTimeout(() => sevSelect.classList.remove('ai-accepted-flash'), 1200);
+        hideAiCard();
+    });
+
+    // Dismiss button
+    aiDismissBtn && aiDismissBtn.addEventListener('click', hideAiCard);
+
+    // Re-hide the card if the user clears the description significantly
+    desc && desc.addEventListener('input', function () {
+        if (lastSuggestedSeverity && desc.value.trim().length < 10) {
+            hideAiCard();
+        }
+    });
+
+    // ── AI Category Classification (Phase 2) ───────────────────────────────
+    const aiCatBtn        = document.getElementById('aiCatBtn');
+    const aiCatBtnTxt     = document.getElementById('aiCatBtnText');
+    const aiCatResultCard = document.getElementById('aiCatResultCard');
+    const aiCatLoading    = document.getElementById('aiCatLoading');
+    const aiCatError      = document.getElementById('aiCatError');
+    const aiCatErrorText  = document.getElementById('aiCatErrorText');
+    const aiCatSuccess    = document.getElementById('aiCatSuccess');
+    const aiCatBadge      = document.getElementById('aiCatBadge');
+    const aiCatConfPill   = document.getElementById('aiCatConfPill');
+    const aiCatReasoning  = document.getElementById('aiCatReasoning');
+    const aiCatAcceptBtn  = document.getElementById('aiCatAcceptBtn');
+    const aiCatDismissBtn = document.getElementById('aiCatDismissBtn');
+
+    let lastSuggestedCategory = null;
+
+    function showCatState(state) {
+        aiCatResultCard.style.display = 'block';
+        aiCatLoading.style.display  = state === 'loading'  ? 'flex'  : 'none';
+        aiCatError.style.display    = state === 'error'    ? 'flex'  : 'none';
+        aiCatSuccess.style.display  = state === 'success'  ? 'block' : 'none';
+    }
+
+    function hideCatCard() {
+        aiCatResultCard.style.display = 'none';
+        lastSuggestedCategory = null;
+    }
+
+    aiCatBtn && aiCatBtn.addEventListener('click', async function () {
+        const description = desc ? desc.value.trim() : '';
+
+        if (description.length < 20) {
+            showCatState('error');
+            aiCatErrorText.textContent = 'Please write at least 20 characters in the description before classifying.';
+            return;
+        }
+
+        aiCatBtn.disabled = true;
+        aiCatBtnTxt.textContent = 'Classifying…';
+        showCatState('loading');
+
+        try {
+            const response = await fetch('<?= APP_URL ?>/ai/classify-category', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ description })
+            });
+
+            const json = await response.json();
+
+            if (!json.success) {
+                showCatState('error');
+                aiCatErrorText.textContent = json.error || 'AI classification failed. Please try again.';
+                return;
+            }
+
+            const { category, confidence, reasoning } = json.data;
+            lastSuggestedCategory = category;
+
+            aiCatBadge.textContent  = category;
+            aiCatBadge.className    = 'ai-cat-badge';
+
+            aiCatConfPill.textContent = (confidence || 'medium').charAt(0).toUpperCase() + (confidence || 'medium').slice(1) + ' confidence';
+            aiCatConfPill.className   = 'ai-confidence-pill ' + ({'high':'conf-high','medium':'conf-medium','low':'conf-low'}[confidence] || 'conf-medium');
+
+            aiCatReasoning.textContent = reasoning || '';
+
+            showCatState('success');
+
+        } catch (err) {
+            showCatState('error');
+            aiCatErrorText.textContent = 'Network error. Please check your connection and try again.';
+            console.error('AI category error:', err);
+        } finally {
+            aiCatBtn.disabled = false;
+            aiCatBtnTxt.textContent = 'AI Suggest Category';
+        }
+    });
+
+    // Apply suggested category
+    aiCatAcceptBtn && aiCatAcceptBtn.addEventListener('click', function () {
+        if (!lastSuggestedCategory || !typeSelect) return;
+        typeSelect.value = lastSuggestedCategory;
+        typeSelect.classList.add('ai-accepted-flash');
+        setTimeout(() => typeSelect.classList.remove('ai-accepted-flash'), 1200);
+        hideCatCard();
+    });
+
+    aiCatDismissBtn && aiCatDismissBtn.addEventListener('click', hideCatCard);
+
+    // Auto-hide category card if description is cleared
+    desc && desc.addEventListener('input', function () {
+        if (lastSuggestedCategory && desc.value.trim().length < 10) hideCatCard();
+    });
+
     // ── Severity badge preview ─────────────────────────────────────────────
-    const sevSelect  = document.getElementById('severity');
     const sevPreview = document.getElementById('severityPreview');
     const sevBadge   = document.getElementById('severityBadge');
     const sevLabels  = { minor:'Minor', moderate:'Moderate', major:'Major', critical:'Critical' };

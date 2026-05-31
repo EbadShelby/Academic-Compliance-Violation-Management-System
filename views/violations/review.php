@@ -281,6 +281,73 @@ $actionIcons = [
 .rev-textarea:disabled { opacity: .5; cursor: not-allowed; }
 
 .text-purple { color: #a78bfa; }
+
+/* AI Case Summary ── Phase 3 */
+.ai-summary-card-wrap {
+    border: 1px solid rgba(139,92,246,.3);
+    border-radius: .75rem;
+    background: rgba(139,92,246,.06);
+    overflow: hidden;
+}
+.ai-summary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem 1.1rem;
+    background: linear-gradient(135deg, rgba(139,92,246,.25), rgba(79,70,229,.2));
+    border: 1px solid rgba(139,92,246,.4);
+    border-radius: .625rem;
+    color: #c4b5fd;
+    font-size: .875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    width: 100%;
+    justify-content: center;
+}
+.ai-summary-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(139,92,246,.4), rgba(79,70,229,.35));
+    border-color: rgba(139,92,246,.65);
+    color: #ddd6fe;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(139,92,246,.2);
+}
+.ai-summary-btn:disabled { opacity:.6; cursor:not-allowed; }
+.ai-summary-result {
+    margin-top: .875rem;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(139,92,246,.2);
+    border-radius: .625rem;
+    padding: .875rem 1rem;
+    font-size: .875rem;
+    color: var(--text-primary);
+    line-height: 1.7;
+    position: relative;
+    animation: aiSlideIn .25s ease;
+}
+.ai-summary-copy-btn {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    background: rgba(139,92,246,.15);
+    border: 1px solid rgba(139,92,246,.3);
+    border-radius: .375rem;
+    color: #c4b5fd;
+    font-size: .8rem;
+    padding: .25rem .6rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    transition: background .15s;
+}
+.ai-summary-copy-btn:hover { background: rgba(139,92,246,.3); }
+.ai-summary-hint {
+    font-size: .74rem;
+    color: var(--text-muted);
+    margin-top: .625rem;
+    font-style: italic;
+}
 </style>
 
 <!-- ── Page header ─────────────────────────────────────────────────────────── -->
@@ -528,6 +595,41 @@ $actionIcons = [
             </div>
         </div>
 
+        <!-- ── AI Tools ──────────────────────────────── -->
+        <div class="review-card mb-4">
+            <div class="review-card-header">
+                <i class="bi bi-stars" style="color:#a78bfa;"></i>
+                AI Tools
+            </div>
+            <div class="review-card-body">
+                <p class="text-muted mb-3" style="font-size:.8125rem;">
+                    Generate a concise professional summary of this case for internal records.
+                    Student names are never sent to the AI.
+                </p>
+                <button type="button" id="aiSummaryBtn" class="ai-summary-btn mb-1">
+                    <i class="bi bi-stars"></i>
+                    <span id="aiSummaryBtnText">Generate AI Case Summary</span>
+                </button>
+                <div id="aiSummaryLoading" class="ai-loading" style="display:none;">
+                    <div class="ai-spinner"></div>
+                    <span>Generating summary…</span>
+                </div>
+                <div id="aiSummaryError" class="ai-error" style="display:none;">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span id="aiSummaryErrorText"></span>
+                </div>
+                <div id="aiSummaryResult" class="ai-summary-result" style="display:none;">
+                    <button type="button" id="aiSummaryCopyBtn" class="ai-summary-copy-btn" title="Copy to clipboard">
+                        <i class="bi bi-clipboard" id="aiSummaryCopyIcon"></i> Copy
+                    </button>
+                    <p id="aiSummaryText" style="margin:0;padding-right:4.5rem;"></p>
+                </div>
+                <p class="ai-summary-hint" id="aiSummaryHint" style="display:none;">
+                    <i class="bi bi-info-circle me-1"></i>AI-generated. Review before use.
+                </p>
+            </div>
+        </div>
+
         <!-- ── Reject Case ───────────────────────────────────────────────────── -->
         <?php if (!$isClosed && in_array('rejected', $availableTransitions, true)): ?>
         <div class="review-card mb-4">
@@ -609,3 +711,117 @@ $actionIcons = [
 
     </div><!-- /col-lg-4 -->
 </div>
+
+<?php
+// Pass violation context to JS as safe JSON (no student name — PII guard)
+$aiCasePayload = json_encode([
+    'type'          => $violation['type']          ?? '',
+    'severity'      => $violation['severity']      ?? '',
+    'description'   => $violation['description']   ?? '',
+    'status'        => $violation['status']        ?? '',
+    'incident_date' => $violation['incident_date'] ?? '',
+    'sanction_notes'=> $violation['sanction_notes'] ?? '',
+    'action_count'  => count($actions),
+], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+?>
+
+<script>
+(function () {
+    // ── AI Case Summary (Phase 3) ─────────────────────────────────────────────
+    const caseData       = <?= $aiCasePayload ?>;
+    const aiSummaryBtn   = document.getElementById('aiSummaryBtn');
+    const aiSummaryBtnTxt= document.getElementById('aiSummaryBtnText');
+    const aiSummaryLoad  = document.getElementById('aiSummaryLoading');
+    const aiSummaryErr   = document.getElementById('aiSummaryError');
+    const aiSummaryErrTxt= document.getElementById('aiSummaryErrorText');
+    const aiSummaryResult= document.getElementById('aiSummaryResult');
+    const aiSummaryText  = document.getElementById('aiSummaryText');
+    const aiSummaryHint  = document.getElementById('aiSummaryHint');
+    const aiSummaryCopyBtn = document.getElementById('aiSummaryCopyBtn');
+    const aiSummaryCopyIcon= document.getElementById('aiSummaryCopyIcon');
+
+    function showSummaryState(state) {
+        aiSummaryLoad.style.display   = state === 'loading' ? 'flex'  : 'none';
+        aiSummaryErr.style.display    = state === 'error'   ? 'flex'  : 'none';
+        aiSummaryResult.style.display = state === 'success' ? 'block' : 'none';
+        aiSummaryHint.style.display   = state === 'success' ? 'block' : 'none';
+    }
+
+    aiSummaryBtn && aiSummaryBtn.addEventListener('click', async function () {
+        aiSummaryBtn.disabled = true;
+        aiSummaryBtnTxt.textContent = 'Generating…';
+        showSummaryState('loading');
+
+        try {
+            const response = await fetch('<?= APP_URL ?>/ai/summarize-case', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(caseData)
+            });
+
+            const json = await response.json();
+
+            if (!json.success) {
+                showSummaryState('error');
+                aiSummaryErrTxt.textContent = json.error || 'AI summary generation failed. Please try again.';
+                return;
+            }
+
+            aiSummaryText.textContent = json.data.summary;
+            showSummaryState('success');
+
+        } catch (err) {
+            showSummaryState('error');
+            aiSummaryErrTxt.textContent = 'Network error. Please check your connection and try again.';
+            console.error('AI summary error:', err);
+        } finally {
+            aiSummaryBtn.disabled = false;
+            aiSummaryBtnTxt.textContent = 'Generate AI Case Summary';
+        }
+    });
+
+    // Copy to clipboard
+    aiSummaryCopyBtn && aiSummaryCopyBtn.addEventListener('click', function () {
+        const text = aiSummaryText ? aiSummaryText.textContent : '';
+        if (!text) return;
+
+        navigator.clipboard.writeText(text).then(() => {
+            aiSummaryCopyIcon.className = 'bi bi-clipboard-check';
+            aiSummaryCopyBtn.title = 'Copied!';
+            setTimeout(() => {
+                aiSummaryCopyIcon.className = 'bi bi-clipboard';
+                aiSummaryCopyBtn.title = 'Copy to clipboard';
+            }, 2000);
+        }).catch(() => {
+            // Fallback for browsers without clipboard API
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity  = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            aiSummaryCopyIcon.className = 'bi bi-clipboard-check';
+            setTimeout(() => { aiSummaryCopyIcon.className = 'bi bi-clipboard'; }, 2000);
+        });
+    });
+
+    // Shared spinner CSS injected here (review.php has no existing <style> with aiSlideIn)
+    if (!document.getElementById('aiReviewAnimStyle')) {
+        const s = document.createElement('style');
+        s.id = 'aiReviewAnimStyle';
+        s.textContent = `
+            @keyframes aiSlideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+            .ai-loading { display:flex; align-items:center; gap:.75rem; padding:.875rem 0; color:#c4b5fd; font-size:.875rem; }
+            .ai-spinner { width:1.1rem;height:1.1rem;border:2px solid rgba(196,181,253,.3);border-top-color:#c4b5fd;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0; }
+            @keyframes spin { to{transform:rotate(360deg)} }
+            .ai-error { display:flex;align-items:center;gap:.6rem;padding:.75rem 0;color:#f87171;font-size:.875rem; }
+        `;
+        document.head.appendChild(s);
+    }
+})();
+</script>
