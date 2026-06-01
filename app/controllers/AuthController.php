@@ -39,6 +39,22 @@ class AuthController extends Controller
      */
     public function login(): void
     {
+        // ── 0. Rate Limiting ─────────────────────────────────────────────────
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        /** @var AuditLog $auditLogModel */
+        $auditLogModel = $this->model('AuditLog');
+        
+        // Block if 5 or more failed attempts in the last 5 minutes
+        if ($auditLogModel->countFailedLoginsByIp($ip, 5) >= 5) {
+            logAction('auth.rate_limit_exceeded', null, null, [
+                'ip'    => $ip,
+                'email' => trim($_POST['email'] ?? '')
+            ]);
+            
+            Session::flash('error', 'Too many failed login attempts. Please try again in 5 minutes.');
+            $this->redirect(APP_URL . '/login');
+        }
+
         // ── 1. Sanitise inputs ───────────────────────────────────────────────
         $email    = trim($_POST['email']    ?? '');
         $password = trim($_POST['password'] ?? '');

@@ -62,6 +62,28 @@ class AuditLog extends Model
     }
 
     /**
+     * Count failed login attempts for a specific IP within the given timeframe.
+     *
+     * @param string $ip
+     * @param int $minutes
+     * @return int
+     */
+    public function countFailedLoginsByIp(string $ip, int $minutes = 5): int
+    {
+        $sql = "SELECT COUNT(*) FROM `audit_logs`
+                WHERE action = 'auth.login_failed'
+                  AND ip_address = :ip
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL :mins MINUTE)";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':ip', $ip, PDO::PARAM_STR);
+        $stmt->bindValue(':mins', $minutes, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
      * Fetch all audit log entries for a specific user.
      *
      * @param  int   $userId
