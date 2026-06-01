@@ -356,6 +356,70 @@ function formatBytes(int $bytes): string {
         </div>
         <?php endif; ?>
 
+        <?php if ($authUser['role'] === 'student' && $violation['status'] !== 'closed'): ?>
+        <!-- ── Student Appeal Form ────────────────────────────────────────── -->
+        <div class="detail-card mb-4" style="border-color: rgba(99, 102, 241, 0.4);">
+            <div class="detail-card-header" style="background: rgba(99, 102, 241, 0.05);">
+                <i class="bi bi-chat-left-text-fill" style="color: #818cf8;"></i>
+                Submit Defense / Appeal
+            </div>
+            <div class="detail-card-body">
+                <p class="text-muted mb-3" style="font-size:.8rem; line-height: 1.5;">
+                    If you wish to provide context, defend yourself, or formally appeal this case, you may submit a statement below. Administrators will review your submission.
+                </p>
+                <form action="<?= APP_URL ?>/violations/<?= $violation['id'] ?>/appeal" method="POST">
+                    <?= csrf_field() ?>
+                    <div class="mb-3">
+                        <textarea class="form-control bg-dark text-light border-secondary"
+                                  name="appeal_reason"
+                                  rows="4"
+                                  placeholder="Enter your defense or appeal reason here..."
+                                  required></textarea>
+                    </div>
+                    <button type="submit" class="action-btn w-100 justify-content-center" style="background: rgba(99,102,241,.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,.3);">
+                        <i class="bi bi-send-fill"></i> Submit Statement
+                    </button>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($authUser['role'] === 'student' && !empty($actions)): ?>
+            <?php 
+                $hasAppeal = false;
+                foreach ($actions as $act) {
+                    if ($act['action_type'] === 'student_appeal') {
+                        $hasAppeal = true;
+                        break;
+                    }
+                }
+            ?>
+            <?php if ($hasAppeal): ?>
+            <!-- ── Student Appeal History ────────────────────────────────────── -->
+            <div class="detail-card mb-4">
+                <div class="detail-card-header">
+                    <i class="bi bi-clock-history"></i>
+                    Your Submissions
+                </div>
+                <div class="detail-card-body p-3">
+                    <div class="d-flex flex-column gap-3">
+                        <?php foreach ($actions as $act): ?>
+                            <?php if ($act['action_type'] === 'student_appeal'): ?>
+                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle);">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge" style="background: rgba(99,102,241,.2); color: #a5b4fc; font-weight: 600;">Appeal / Defense</span>
+                                    <small class="text-muted"><?= date('M d, Y H:i', strtotime($act['created_at'])) ?></small>
+                                </div>
+                                <div style="font-size: .875rem; color: var(--text-primary); white-space: pre-wrap;"><?= htmlspecialchars(str_replace('Student Defense/Appeal: ', '', $act['note'] ?? '')) ?></div>
+                            </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+        <?php endif; ?>
+
         <!-- ── Audit trail note ────────────────────────────────────────── -->
         <div class="detail-card">
             <div class="detail-card-header">

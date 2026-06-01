@@ -236,6 +236,44 @@ class NotificationService
         ]);
     }
 
+    /**
+     * Notify all admins that a student submitted a defense or appeal.
+     *
+     * @param int    $violationId
+     * @param string $studentName
+     */
+    public function notifyAdminsAppealSubmitted(int $violationId, string $studentName): void
+    {
+        $adminIds = $this->getAdminIds();
+        foreach ($adminIds as $adminId) {
+            $this->send($adminId, [
+                'title'           => 'Student Appeal Submitted',
+                'message'         => $studentName . ' has submitted a formal defense/appeal for Case #' . $violationId . '.',
+                'type'            => 'warning',
+                'reference_id'    => $violationId,
+                'reference_table' => 'violations',
+            ]);
+        }
+    }
+
+    /**
+     * Notify the reporting teacher that a student submitted an appeal/defense.
+     *
+     * @param int    $teacherId
+     * @param int    $violationId
+     * @param string $studentName
+     */
+    public function notifyTeacherAppealSubmitted(int $teacherId, int $violationId, string $studentName): void
+    {
+        $this->send($teacherId, [
+            'title'           => 'Student Appeal Submitted',
+            'message'         => $studentName . ' has submitted a defense/appeal for your reported Case #' . $violationId . '.',
+            'type'            => 'info',
+            'reference_id'    => $violationId,
+            'reference_table' => 'violations',
+        ]);
+    }
+
     // =========================================================================
     // Private helpers
     // =========================================================================

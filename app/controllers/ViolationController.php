@@ -603,6 +603,74 @@ class ViolationController extends Controller
     }
 
     // =========================================================================
+    // POST /violations/{id}/appeal  [student only]
+    // =========================================================================
+
+    /**
+     * Submit a formal defense or appeal for a recorded violation.
+     */
+    public function submitAppeal(int $id): void
+    {
+        authorize(['student']);
+
+        $vm        = $this->violationModel();
+        $violation = $vm->findWithDetails($id);
+
+        if (!$violation) {
+            $this->abort(404, 'Violation not found.');
+        }
+
+        $authUser = Session::user();
+
+        if ($violation['student_id'] != $authUser['id']) {
+            $this->abort(403, 'You are not authorised to appeal this record.');
+        }
+
+        if ($violation['status'] === 'closed') {
+            Session::flash('error', 'This case is closed and can no longer be appealed.');
+            $this->redirect(APP_URL . '/violations/' . $id);
+        }
+
+        $reason = trim($_POST['appeal_reason'] ?? '');
+
+        if ($reason === '') {
+            Session::flash('error', 'You must provide a reason for your defense or appeal.');
+            $this->redirect(APP_URL . '/violations/' . $id);
+        }
+
+        $this->actionModel()->createAction([
+            'violation_id' => $id,
+            'actor_id'     => $authUser['id'],
+            'action_type'  => 'student_appeal',
+            'note'         => 'Student Defense/Appeal: ' . $reason,
+        ]);
+
+        $this->auditModel()->createLog([
+            'user_id'     => $authUser['id'],
+            'action'      => 'violation.appeal_submitted',
+            'target_type' => 'Violation',
+            'target_id'   => $id,
+            'detail'      => ['reason' => $reason],
+            'ip_address'  => $_SERVER['REMOTE_ADDR']     ?? null,
+            'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        ]);
+
+        // Notifications
+        $ns          = $this->notificationService();
+        $teacherId   = (int) ($violation['reported_by'] ?? 0);
+        $studentName = trim(($authUser['first_name'] ?? '') . ' ' . ($authUser['last_name'] ?? 'Student'));
+
+        $ns->notifyAdminsAppealSubmitted($id, $studentName);
+
+        if ($teacherId) {
+            $ns->notifyTeacherAppealSubmitted($teacherId, $id, $studentName);
+        }
+
+        Session::flash('success', 'Your defense/appeal has been formally submitted and will be reviewed.');
+        $this->redirect(APP_URL . '/violations/' . $id);
+    }
+
+    // =========================================================================
     // GET /violations/{id}/edit
     // =========================================================================
 
