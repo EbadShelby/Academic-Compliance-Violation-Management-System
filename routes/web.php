@@ -15,6 +15,11 @@ $router->get('/login',  'AuthController@showLogin');
 $router->post('/login', 'AuthController@login');
 $router->get('/logout', 'AuthController@logout');
 
+// ── Profile ──────────────────────────────────────────────────────────────────
+$router->get('/profile',               'ProfileController@index');
+$router->post('/profile/update',       'ProfileController@update');
+$router->post('/profile/password',     'ProfileController@updatePassword');
+
 // ── Dashboard ────────────────────────────────────────────────────────────────
 $router->get('/dashboard', 'DashboardController@index');
 

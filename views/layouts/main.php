@@ -118,7 +118,12 @@
             padding: .75rem;
             border-radius: .75rem;
             background: rgba(255,255,255,.04);
-            cursor: default;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: background .15s;
+        }
+        .user-card:hover {
+            background: rgba(255,255,255,.08);
         }
         .user-avatar {
             width: 36px; height: 36px;
@@ -356,7 +361,7 @@
     <div class="sidebar-footer">
         <?php $authUser = Session::user(); ?>
         <?php if ($authUser): ?>
-        <div class="user-card">
+        <a href="<?= APP_URL ?>/profile" class="user-card" title="View or Edit Profile">
             <div class="user-avatar" aria-hidden="true">
                 <?= mb_substr($authUser['name'] ?? 'U', 0, 1) ?>
             </div>
@@ -364,8 +369,8 @@
                 <div class="user-info-name text-truncate"><?= htmlspecialchars($authUser['name'] ?? '') ?></div>
                 <div class="user-info-role"><?= htmlspecialchars($authUser['role'] ?? '') ?></div>
             </div>
-        </div>
-        <a href="<?= APP_URL ?>/logout" class="btn-logout" id="logoutLink">
+        </a>
+        <a href="<?= APP_URL ?>/logout" class="btn-logout" id="logoutLink" style="margin-top: .5rem;">
             <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sign out
         </a>
         <?php endif; ?>
