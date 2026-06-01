@@ -99,6 +99,7 @@ select.field-input option { background: #1e293b; }
 
 <div class="form-card">
     <form method="POST" action="<?= APP_URL ?>/admin/users" id="createUserForm" novalidate>
+        <?= csrf_field() ?>
 
         <!-- Personal Info -->
         <div class="form-section-title">Personal Information</div>

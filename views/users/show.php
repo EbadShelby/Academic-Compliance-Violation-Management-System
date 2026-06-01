@@ -208,6 +208,7 @@
                 <?php if ((int)$user['is_active'] === 1): ?>
                 <form method="POST" action="<?= APP_URL ?>/admin/users/<?= $user['id'] ?>/delete"
                     onsubmit="return confirm('Deactivate this user? They will not be able to log in.')">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="_action" value="deactivate">
                     <button type="submit" class="action-form-btn btn-deactivate">
                         <i class="bi bi-person-dash-fill"></i> Deactivate Account
@@ -216,6 +217,7 @@
                 <?php else: ?>
                 <form method="POST" action="<?= APP_URL ?>/admin/users/<?= $user['id'] ?>/delete"
                     onsubmit="return confirm('Reactivate this user?')">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="_action" value="reactivate">
                     <button type="submit" class="action-form-btn btn-reactivate">
                         <i class="bi bi-person-check-fill"></i> Reactivate Account

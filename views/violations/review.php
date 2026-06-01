@@ -556,6 +556,7 @@ $actionIcons = [
                     <!-- Move to Under Review -->
                     <?php if (in_array('under_review', $availableTransitions, true)): ?>
                     <form method="POST" action="<?= APP_URL ?>/violations/<?= $violation['id'] ?>/status">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="new_status" value="under_review">
                         <button type="submit" class="wf-btn wf-review">
                             <i class="bi bi-eye-fill"></i> Move to Under Review
@@ -566,6 +567,7 @@ $actionIcons = [
                     <!-- Resolve -->
                     <?php if (in_array('resolved', $availableTransitions, true)): ?>
                     <form method="POST" action="<?= APP_URL ?>/violations/<?= $violation['id'] ?>/status">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="new_status" value="resolved">
                         <button type="submit" class="wf-btn wf-resolve"
                                 onclick="return confirm('Mark this case as Resolved?')">
@@ -577,6 +579,7 @@ $actionIcons = [
                     <!-- Close -->
                     <?php if (in_array('closed', $availableTransitions, true)): ?>
                     <form method="POST" action="<?= APP_URL ?>/violations/<?= $violation['id'] ?>/close">
+                        <?= csrf_field() ?>
                         <button type="submit" class="wf-btn wf-close"
                                 onclick="return confirm('Close this case permanently? This cannot be undone.')">
                             <i class="bi bi-lock-fill"></i> Close Case
@@ -643,6 +646,7 @@ $actionIcons = [
                 </p>
                 <form method="POST" action="<?= APP_URL ?>/violations/<?= $violation['id'] ?>/reject"
                       id="rejectForm">
+                    <?= csrf_field() ?>
                     <textarea name="rejection_reason"
                               id="rejectionReason"
                               class="rev-textarea mb-3"
@@ -677,6 +681,7 @@ $actionIcons = [
                     Document the sanction applied (warning, suspension, counselling, etc.).
                 </p>
                 <form method="POST" action="<?= APP_URL ?>/violations/<?= $violation['id'] ?>/sanction">
+                    <?= csrf_field() ?>
                     <textarea name="sanction_notes"
                               id="sanctionNotes"
                               class="rev-textarea mb-3"

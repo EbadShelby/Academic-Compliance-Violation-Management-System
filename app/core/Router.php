@@ -56,6 +56,13 @@ class Router
     {
         $method = strtoupper($_SERVER['REQUEST_METHOD']);
 
+        // Enforce CSRF protection for all state-changing requests
+        if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
+            if (function_exists('verify_csrf_token') && !verify_csrf_token()) {
+                $this->handleForbidden('Invalid or missing CSRF token. Request aborted.');
+            }
+        }
+
         // Support method spoofing via hidden _method field (PUT / DELETE forms)
         if ($method === 'POST' && isset($_POST['_method'])) {
             $method = strtoupper($_POST['_method']);
@@ -144,6 +151,19 @@ class Router
             require $errorView;
         } else {
             echo '<h1>404 — Not Found</h1><p>' . htmlspecialchars($message) . '</p>';
+        }
+        exit;
+    }
+
+    private function handleForbidden(string $message = 'Forbidden'): never
+    {
+        http_response_code(403);
+        $errorView = BASE_PATH . '/views/errors/403.php';
+
+        if (file_exists($errorView)) {
+            require $errorView;
+        } else {
+            echo '<h1>403 — Forbidden</h1><p>' . htmlspecialchars($message) . '</p>';
         }
         exit;
     }

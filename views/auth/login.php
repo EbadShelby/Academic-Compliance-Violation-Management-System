@@ -374,6 +374,7 @@
 
         <!-- Login Form -->
         <form id="loginForm" method="POST" action="<?= APP_URL ?>/login" novalidate>
+            <?= csrf_field() ?>
 
             <!-- Email -->
             <div>

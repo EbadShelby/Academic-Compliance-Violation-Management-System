@@ -272,6 +272,7 @@ function formatBytes(int $bytes): string {
                                   action="<?= APP_URL ?>/evidence/<?= $ef['id'] ?>/delete"
                                   style="display:inline;"
                                   onsubmit="return confirm('Permanently delete this evidence file?');">
+                                <?= csrf_field() ?>
                                 <button type="submit" class="ev-btn ev-btn-delete" title="Delete">
                                     <i class="bi bi-trash3"></i>
                                 </button>
@@ -328,6 +329,7 @@ function formatBytes(int $bytes): string {
                       method="POST"
                       enctype="multipart/form-data"
                       id="evidenceUploadForm">
+                    <?= csrf_field() ?>
 
                     <div class="upload-mini-zone" id="miniUploadZone">
                         <input type="file"

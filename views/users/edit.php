@@ -139,6 +139,7 @@ select.field-input option { background: #1e293b; }
     <div class="col-lg-8">
         <div class="form-card">
             <form method="POST" action="<?= APP_URL ?>/admin/users/<?= $user['id'] ?>" id="editUserForm" novalidate>
+                <?= csrf_field() ?>
 
                 <!-- Personal Info -->
                 <div class="form-section-title">Personal Information</div>
@@ -271,6 +272,7 @@ select.field-input option { background: #1e293b; }
             </p>
             <form method="POST" action="<?= APP_URL ?>/admin/users/<?= $user['id'] ?>/delete" id="resetPwForm"
                 onsubmit="return confirm('Reset this user\'s password?')">
+                <?= csrf_field() ?>
                 <input type="hidden" name="_action" value="reset_password">
 
                 <div class="field-group">

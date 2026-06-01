@@ -177,6 +177,7 @@ $authUser = Session::user();
 
     <?php if ($unreadCount > 0): ?>
     <form method="POST" action="<?= APP_URL ?>/notifications/read-all" id="markAllForm">
+        <?= csrf_field() ?>
         <button type="submit" class="mark-all-btn" id="markAllBtn">
             <i class="bi bi-check2-all"></i> Mark all as read
         </button>

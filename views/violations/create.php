@@ -35,6 +35,7 @@
     <?php endif; ?>
 
     <form action="<?= APP_URL ?>/violations" method="POST" enctype="multipart/form-data" novalidate id="violationForm">
+        <?= csrf_field() ?>
 
         <div class="row g-4">
 

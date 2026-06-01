@@ -44,7 +44,7 @@ require_once BASE_PATH . '/app/helpers/upload.php';   // Phase 9: upload utiliti
 require_once BASE_PATH . '/app/helpers/logger.php';   // Phase 11: centralized audit logger
 
 // Load additional helpers only if they are non-empty (skip empty stubs)
-$helpers = ['redirect.php', 'response.php', 'validation.php'];
+$helpers = ['redirect.php', 'response.php', 'validation.php', 'csrf.php'];
 foreach ($helpers as $helper) {
     $path = BASE_PATH . '/app/helpers/' . $helper;
     if (file_exists($path) && filesize($path) > 0) {
