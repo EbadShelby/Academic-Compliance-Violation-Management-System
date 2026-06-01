@@ -267,11 +267,17 @@ $fDateTo   = htmlspecialchars($filters['date_to']   ?? '');
             </div>
 
             <!-- Buttons -->
-            <div class="col-12 col-md-1 d-flex gap-2">
-                <button type="submit" class="btn btn-primary btn-sm flex-grow-1" id="auditFilterBtn">
+            <div class="col-12 col-md-auto d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm flex-grow-1" id="auditFilterBtn" title="Apply Filters">
                     <i class="bi bi-funnel-fill"></i>
                 </button>
-                <?php if (!empty(array_filter($filters))): ?>
+                <?php $activeFilters = array_filter($filters, fn($v) => $v !== '' && $v !== null && $v !== 0); ?>
+                <a href="<?= APP_URL ?>/admin/audit-logs/export<?= $activeFilters ? '?' . http_build_query($activeFilters) : '' ?>" 
+                   class="btn btn-sm btn-outline-secondary" 
+                   title="Export to CSV">
+                    <i class="bi bi-download"></i>
+                </a>
+                <?php if (!empty($activeFilters)): ?>
                 <a href="<?= APP_URL ?>/admin/audit-logs"
                    class="btn btn-sm btn-outline-secondary"
                    id="auditClearBtn"

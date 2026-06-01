@@ -169,6 +169,11 @@ $authUser = Session::user();
             <input type="text" class="search-input" id="violSearch" placeholder="Search violations…" autocomplete="off">
         </div>
         <div class="d-flex align-items-center gap-2">
+            <?php if (isAdmin()): ?>
+            <a href="<?= APP_URL ?>/violations/export" class="btn btn-sm btn-outline-secondary" style="border-radius:.625rem; padding:.5rem 1rem;">
+                <i class="bi bi-download"></i> Export CSV
+            </a>
+            <?php endif; ?>
             <?php if (isTeacher() || isAdmin()): ?>
             <a href="<?= APP_URL ?>/violations/create" class="btn-file-violation">
                 <i class="bi bi-plus-circle"></i> File Violation

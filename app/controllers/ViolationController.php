@@ -100,6 +100,44 @@ class ViolationController extends Controller
     }
 
     // =========================================================================
+    // GET /violations/export
+    // =========================================================================
+
+    /**
+     * Export all violations to CSV for admins.
+     */
+    public function export(): void
+    {
+        authorize(['admin']);
+
+        $vm = $this->violationModel();
+        $violations = $vm->allWithDetails();
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=violations_export_' . date('Y-m-d') . '.csv');
+
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['ID', 'Student Name', 'Student ID', 'Category', 'Severity', 'Status', 'Incident Date', 'Reported By', 'Created At'], ',', '"', '\\');
+
+        foreach ($violations as $row) {
+            fputcsv($output, [
+                $row['id'],
+                $row['student_name'],
+                $row['student_number'],
+                $row['type'],
+                ucfirst($row['severity']),
+                ucfirst(str_replace('_', ' ', $row['status'])),
+                $row['incident_date'],
+                $row['reporter_name'],
+                $row['created_at'],
+            ], ',', '"', '\\');
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    // =========================================================================
     // GET /violations/create
     // =========================================================================
 

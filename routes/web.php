@@ -25,6 +25,7 @@ $router->get('/dashboard', 'DashboardController@index');
 
 // ── Violations ───────────────────────────────────────────────────────────────
 $router->get('/violations',        'ViolationController@index');
+$router->get('/violations/export', 'ViolationController@export');
 $router->get('/violations/create', 'ViolationController@create');
 $router->post('/violations',       'ViolationController@store');
 $router->get('/violations/{id}',   'ViolationController@show');
@@ -51,7 +52,8 @@ $router->post('/admin/users/{id}',     'UserController@update');
 $router->post('/admin/users/{id}/delete', 'UserController@delete');
 
 // ── Audit Logs ───────────────────────────────────────────────────────────────
-$router->get('/admin/audit-logs', 'AuditController@index');
+$router->get('/admin/audit-logs',        'AuditController@index');
+$router->get('/admin/audit-logs/export', 'AuditController@export');
 
 // ── Evidence Files ────────────────────────────────────────────────────────────
 $router->post('/violations/{id}/evidence',         'EvidenceController@upload');   // attach file to violation
