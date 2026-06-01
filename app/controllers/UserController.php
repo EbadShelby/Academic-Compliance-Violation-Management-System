@@ -60,6 +60,158 @@ class UserController extends Controller
     }
 
     // =========================================================================
+    // GET /admin/users/import
+    // =========================================================================
+
+    /**
+     * Show the bulk CSV import form.
+     */
+    public function import(): void
+    {
+        authorize('admin');
+
+        $this->view('users.import', [
+            'title'     => 'Import Users — ' . APP_NAME,
+            'pageTitle' => 'Import Users (CSV)',
+            'errors'    => Session::getFlash('errors') ?? [],
+        ]);
+    }
+
+    // =========================================================================
+    // POST /admin/users/import
+    // =========================================================================
+
+    /**
+     * Process the uploaded CSV file.
+     */
+    public function processImport(): void
+    {
+        authorize('admin');
+
+        if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+            Session::flash('error', 'Please select a valid CSV file to upload.');
+            $this->redirect(APP_URL . '/admin/users/import');
+        }
+
+        $fileTmpPath = $_FILES['csv_file']['tmp_name'];
+        $fileName = $_FILES['csv_file']['name'];
+        
+        $fileNameCmps = explode(".", $fileName);
+        $fileExtension = strtolower(end($fileNameCmps));
+
+        if ($fileExtension !== 'csv') {
+            Session::flash('error', 'Invalid file extension. Only CSV files are allowed.');
+            $this->redirect(APP_URL . '/admin/users/import');
+        }
+
+        if (($handle = fopen($fileTmpPath, "r")) !== FALSE) {
+            $header = fgetcsv($handle, 1000, ",");
+            if (!$header) {
+                Session::flash('error', 'The uploaded file is empty or has an invalid format.');
+                $this->redirect(APP_URL . '/admin/users/import');
+            }
+
+            // Normalize header
+            $header = array_map('trim', $header);
+            $header = array_map('strtolower', $header);
+
+            $requiredCols = ['first_name', 'last_name', 'email', 'role'];
+            foreach ($requiredCols as $col) {
+                if (!in_array($col, $header)) {
+                    Session::flash('error', "Missing required column: '{$col}'. Please check the template format.");
+                    $this->redirect(APP_URL . '/admin/users/import');
+                }
+            }
+
+            $userModel = $this->userModel();
+            $roleMap = $this->roleModel()->allSlugsToIds();
+
+            $successCount = 0;
+            $errors = [];
+            $rowNum = 1; // Header is row 1
+
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                $rowNum++;
+                // Combine header with data, if column counts match
+                if (count($header) !== count($data)) {
+                    $errors[] = "Row {$rowNum}: Column count mismatch.";
+                    continue;
+                }
+
+                $row = array_combine($header, $data);
+                
+                $firstName = trim($row['first_name'] ?? '');
+                $lastName = trim($row['last_name'] ?? '');
+                $email = strtolower(trim($row['email'] ?? ''));
+                $roleSlug = strtolower(trim($row['role'] ?? ''));
+                $studentId = isset($row['student_id']) ? trim($row['student_id']) : '';
+                $password = isset($row['password']) && trim($row['password']) !== '' ? trim($row['password']) : 'TempPass123!';
+
+                if (empty($firstName) || empty($lastName) || empty($email) || empty($roleSlug)) {
+                    $errors[] = "Row {$rowNum}: Missing required fields.";
+                    continue;
+                }
+
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $errors[] = "Row {$rowNum}: Invalid email format ({$email}).";
+                    continue;
+                }
+
+                if (!isset($roleMap[$roleSlug])) {
+                    $errors[] = "Row {$rowNum}: Invalid role '{$roleSlug}'. Must be admin, teacher, or student.";
+                    continue;
+                }
+
+                if ($userModel->emailExists($email)) {
+                    $errors[] = "Row {$rowNum}: Email '{$email}' already exists.";
+                    continue;
+                }
+
+                if (!empty($studentId) && $userModel->studentIdExists($studentId)) {
+                    $errors[] = "Row {$rowNum}: Student ID '{$studentId}' already in use.";
+                    continue;
+                }
+
+                $userData = [
+                    'first_name' => $firstName,
+                    'last_name'  => $lastName,
+                    'email'      => $email,
+                    'role_id'    => $roleMap[$roleSlug],
+                    'student_id' => $studentId,
+                    'password'   => $password
+                ];
+
+                $newId = $userModel->createUser($userData);
+                if ($newId) {
+                    $successCount++;
+                } else {
+                    $errors[] = "Row {$rowNum}: Database error creating user '{$email}'.";
+                }
+            }
+            fclose($handle);
+
+            if ($successCount > 0) {
+                logAction('user.bulk_imported', 'User', 0, ['count' => $successCount, 'errors' => count($errors)]);
+                $msg = "Successfully imported {$successCount} users.";
+                if (!empty($errors)) {
+                    $msg .= " However, some rows had errors and were skipped.";
+                    Session::flash('errors', $errors);
+                }
+                Session::flash('success', $msg);
+            } else {
+                Session::flash('error', 'No users were imported. Please check the errors below.');
+                Session::flash('errors', $errors);
+                $this->redirect(APP_URL . '/admin/users/import');
+            }
+
+            $this->redirect(APP_URL . '/admin/users');
+        } else {
+             Session::flash('error', 'Could not read the uploaded file.');
+             $this->redirect(APP_URL . '/admin/users/import');
+        }
+    }
+
+    // =========================================================================
     // GET /admin/users/create
     // =========================================================================
 

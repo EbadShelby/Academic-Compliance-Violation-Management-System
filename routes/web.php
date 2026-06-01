@@ -36,6 +36,8 @@ $router->post('/violations/{id}/sanction','ViolationController@assignSanction');
 
 // ── Admin — User Management ──────────────────────────────────────────────────
 $router->get('/admin/users',           'UserController@index');
+$router->get('/admin/users/import',    'UserController@import');
+$router->post('/admin/users/import',   'UserController@processImport');
 $router->get('/admin/users/create',    'UserController@create');
 $router->post('/admin/users',          'UserController@store');
 $router->get('/admin/users/{id}',      'UserController@show');

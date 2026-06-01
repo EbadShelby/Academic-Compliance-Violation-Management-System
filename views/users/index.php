@@ -186,9 +186,14 @@ foreach ($users as $u) {
             <i class="bi bi-search"></i>
             <input type="text" id="userSearch" placeholder="Search users…" autocomplete="off">
         </div>
-        <a href="<?= APP_URL ?>/admin/users/create" class="action-btn" style="background:rgba(79,70,229,.15);border-color:rgba(79,70,229,.4);color:#a5b4fc;gap:.4rem;" id="createUserBtn">
-            <i class="bi bi-plus-circle-fill"></i> Create User
-        </a>
+        <div class="d-flex gap-2">
+            <a href="<?= APP_URL ?>/admin/users/import" class="action-btn" style="background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:#6ee7b7;gap:.4rem;" id="importUsersBtn">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Import CSV
+            </a>
+            <a href="<?= APP_URL ?>/admin/users/create" class="action-btn" style="background:rgba(79,70,229,.15);border-color:rgba(79,70,229,.4);color:#a5b4fc;gap:.4rem;" id="createUserBtn">
+                <i class="bi bi-plus-circle-fill"></i> Create User
+            </a>
+        </div>
     </div>
 
     <?php if (empty($users)): ?>
