@@ -75,6 +75,46 @@ class User extends Model
     }
 
     /**
+     * Fetch paginated users with their role info.
+     *
+     * @param  int   $page     1-based page number
+     * @param  int   $perPage  Number of items per page
+     * @param  string $direction
+     * @return array{rows: array, total: int, pages: int, page: int}
+     */
+    public function getPaginatedUsers(int $page = 1, int $perPage = 50, string $direction = 'DESC'): array
+    {
+        $direction = strtoupper($direction) === 'ASC' ? 'ASC' : 'DESC';
+
+        $countSql = "SELECT COUNT(*) FROM `users`";
+        $total = (int) $this->query($countSql)->fetchColumn();
+
+        $pages  = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
+        $page   = max(1, min($page, $pages ?: 1));
+        $offset = ($page - 1) * $perPage;
+
+        $rowSql = "SELECT u.id, u.first_name, u.last_name, u.email,
+                          u.student_id, u.created_at, u.is_active,
+                          r.id AS role_id, r.name AS role_name, r.slug AS role
+                   FROM `users` u
+                   LEFT JOIN `roles` r ON r.id = u.role_id
+                   ORDER BY u.created_at {$direction}
+                   LIMIT :lim OFFSET :off";
+
+        $stmt = $this->db->prepare($rowSql);
+        $stmt->bindValue(':lim', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'rows'  => $stmt->fetchAll(),
+            'total' => $total,
+            'pages' => $pages,
+            'page'  => $page,
+        ];
+    }
+
+    /**
      * Find a single user with their role info.
      */
     public function findWithRole(int $id): array|false

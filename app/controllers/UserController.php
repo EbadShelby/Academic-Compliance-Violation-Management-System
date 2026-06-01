@@ -50,12 +50,16 @@ class UserController extends Controller
     {
         authorize('admin');
 
-        $users = $this->userModel()->allWithRoles();
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $result = $this->userModel()->getPaginatedUsers($page);
 
         $this->view('users.index', [
             'title'     => 'User Management — ' . APP_NAME,
             'pageTitle' => 'User Management',
-            'users'     => $users,
+            'users'     => $result['rows'],
+            'total'     => $result['total'],
+            'pages'     => $result['pages'],
+            'page'      => $result['page'],
         ]);
     }
 

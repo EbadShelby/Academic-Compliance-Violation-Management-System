@@ -265,6 +265,56 @@ class Violation extends Model
     }
 
     /**
+     * Fetch paginated violations with student name and reporter name.
+     *
+     * @param  int   $page     1-based page number
+     * @param  int   $perPage  Number of items per page
+     * @param  string $direction
+     * @return array{rows: array, total: int, pages: int, page: int}
+     */
+    public function getPaginatedWithDetails(int $page = 1, int $perPage = 50, string $direction = 'DESC'): array
+    {
+        $direction = strtoupper($direction) === 'ASC' ? 'ASC' : 'DESC';
+
+        $countSql = "SELECT COUNT(*) FROM `violations` v
+                     JOIN `users` s ON s.id = v.student_id
+                     JOIN `users` r ON r.id = v.reported_by";
+        $total = (int) $this->query($countSql)->fetchColumn();
+
+        $pages  = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
+        $page   = max(1, min($page, $pages ?: 1));
+        $offset = ($page - 1) * $perPage;
+
+        $rowSql = "SELECT
+                    v.id,
+                    v.type,
+                    v.severity,
+                    v.status,
+                    v.incident_date,
+                    v.created_at,
+                    CONCAT(s.first_name, ' ', s.last_name) AS student_name,
+                    s.student_id                            AS student_number,
+                    CONCAT(r.first_name, ' ', r.last_name) AS reporter_name
+                FROM `violations` v
+                JOIN `users` s ON s.id = v.student_id
+                JOIN `users` r ON r.id = v.reported_by
+                ORDER BY v.created_at {$direction}
+                LIMIT :lim OFFSET :off";
+
+        $stmt = $this->db->prepare($rowSql);
+        $stmt->bindValue(':lim', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'rows'  => $stmt->fetchAll(),
+            'total' => $total,
+            'pages' => $pages,
+            'page'  => $page,
+        ];
+    }
+
+    /**
      * Fetch a single violation with full detail.
      */
     public function findWithDetails(int $id): array|false
@@ -305,6 +355,54 @@ class Violation extends Model
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':sid' => $studentUserId]);
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Fetch paginated violations for a specific student.
+     *
+     * @param  int    $studentUserId
+     * @param  int    $page     1-based page number
+     * @param  int    $perPage  Number of items per page
+     * @param  string $direction
+     * @return array{rows: array, total: int, pages: int, page: int}
+     */
+    public function getPaginatedByStudent(int $studentUserId, int $page = 1, int $perPage = 50, string $direction = 'DESC'): array
+    {
+        $direction = strtoupper($direction) === 'ASC' ? 'ASC' : 'DESC';
+
+        $countSql = "SELECT COUNT(*) FROM `violations` v
+                     JOIN `users` r ON r.id = v.reported_by
+                     WHERE v.student_id = :sid";
+        
+        $cStmt = $this->db->prepare($countSql);
+        $cStmt->execute([':sid' => $studentUserId]);
+        $total = (int) $cStmt->fetchColumn();
+
+        $pages  = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
+        $page   = max(1, min($page, $pages ?: 1));
+        $offset = ($page - 1) * $perPage;
+
+        $rowSql = "SELECT
+                    v.*,
+                    CONCAT(r.first_name, ' ', r.last_name) AS reporter_name
+                FROM `violations` v
+                JOIN `users` r ON r.id = v.reported_by
+                WHERE v.student_id = :sid
+                ORDER BY v.created_at {$direction}
+                LIMIT :lim OFFSET :off";
+
+        $stmt = $this->db->prepare($rowSql);
+        $stmt->bindValue(':sid', $studentUserId, PDO::PARAM_INT);
+        $stmt->bindValue(':lim', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'rows'  => $stmt->fetchAll(),
+            'total' => $total,
+            'pages' => $pages,
+            'page'  => $page,
+        ];
     }
 
     /**

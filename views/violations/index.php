@@ -145,6 +145,20 @@ $authUser = Session::user();
     transition: opacity .15s;
 }
 .btn-file-violation:hover { opacity: .88; color: #fff; }
+
+/* Pagination */
+.app-pagination .page-link {
+    background: rgba(255,255,255,.04);
+    border-color: rgba(255,255,255,.1);
+    color: var(--text-muted);
+    font-size: .8rem;
+}
+.app-pagination .page-item.active .page-link {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #fff;
+}
+.app-pagination .page-item.disabled .page-link { opacity: .4; }
 </style>
 
 <!-- ── Toolbar ─────────────────────────────────────────────────────────── -->
@@ -235,6 +249,54 @@ $authUser = Session::user();
             </tbody>
         </table>
     </div>
+    
+    <!-- ── Pagination ─────────────────────────────────────────────────────── -->
+    <?php if ($pages > 1): ?>
+    <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-top:1px solid var(--border-subtle);">
+        <div style="font-size:.775rem;color:var(--text-muted);">
+            Page <?= $page ?> of <?= $pages ?> &mdash; <?= number_format($total) ?> entries
+        </div>
+        <nav aria-label="Violation pagination">
+            <ul class="pagination pagination-sm app-pagination mb-0">
+                <!-- Previous -->
+                <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                    <a class="page-link" href="<?= APP_URL . '/violations?page=' . ($page - 1) ?>" aria-label="Previous">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+
+                <?php
+                $window = 3;
+                $start  = max(1, $page - $window);
+                $end    = min($pages, $page + $window);
+                if ($start > 1):
+                ?>
+                    <li class="page-item"><a class="page-link" href="<?= APP_URL . '/violations?page=1' ?>">1</a></li>
+                    <?php if ($start > 2): ?><li class="page-item disabled"><span class="page-link">…</span></li><?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($p = $start; $p <= $end; $p++): ?>
+                <li class="page-item <?= $p === $page ? 'active' : '' ?>">
+                    <a class="page-link" href="<?= APP_URL . '/violations?page=' . $p ?>"><?= $p ?></a>
+                </li>
+                <?php endfor; ?>
+
+                <?php if ($end < $pages): ?>
+                    <?php if ($end < $pages - 1): ?><li class="page-item disabled"><span class="page-link">…</span></li><?php endif; ?>
+                    <li class="page-item"><a class="page-link" href="<?= APP_URL . '/violations?page=' . $pages ?>"><?= $pages ?></a></li>
+                <?php endif; ?>
+
+                <!-- Next -->
+                <li class="page-item <?= $page >= $pages ? 'disabled' : '' ?>">
+                    <a class="page-link" href="<?= APP_URL . '/violations?page=' . ($page + 1) ?>" aria-label="Next">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <?php endif; ?>
+
     <?php endif; ?>
 </div>
 

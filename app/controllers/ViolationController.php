@@ -80,17 +80,22 @@ class ViolationController extends Controller
 
         $vm       = $this->violationModel();
         $authUser = Session::user();
+        
+        $page = max(1, (int) ($_GET['page'] ?? 1));
 
         if ($authUser['role'] === 'student') {
-            $violations = $vm->findByStudent((int) $authUser['id']);
+            $result = $vm->getPaginatedByStudent((int) $authUser['id'], $page);
         } else {
-            $violations = $vm->allWithDetails();
+            $result = $vm->getPaginatedWithDetails($page);
         }
 
         $this->view('violations.index', [
             'title'      => 'Violations — ' . APP_NAME,
             'pageTitle'  => 'Violations',
-            'violations' => $violations,
+            'violations' => $result['rows'],
+            'total'      => $result['total'],
+            'pages'      => $result['pages'],
+            'page'       => $result['page'],
         ]);
     }
 
