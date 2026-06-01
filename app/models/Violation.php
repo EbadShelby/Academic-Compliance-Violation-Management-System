@@ -144,6 +144,41 @@ class Violation extends Model
     }
 
     /**
+     * Update an existing violation record.
+     *
+     * Expected $data keys:
+     *   student_id, type, description, severity, incident_date
+     *
+     * @param  int   $id    Violation ID
+     * @param  array $data  Fields to update
+     * @return bool         True if successful
+     */
+    public function updateViolation(int $id, array $data): bool
+    {
+        $payload = [
+            'student_id'    => (int) $data['student_id'],
+            'type'          => trim($data['type']),
+            'description'   => trim($data['description']),
+            'severity'      => $data['severity'],
+            'incident_date' => $data['incident_date'],
+        ];
+
+        return $this->update($id, $payload);
+    }
+
+    /**
+     * Hard delete a violation record from the database.
+     * (Warning: Ensure associated evidence and logs are handled properly).
+     *
+     * @param  int  $id Violation ID
+     * @return bool     True if deleted
+     */
+    public function deleteViolation(int $id): bool
+    {
+        return $this->delete($id);
+    }
+
+    /**
      * Update the status of a violation.
      *
      * Transition validity is NOT re-checked here — the controller is

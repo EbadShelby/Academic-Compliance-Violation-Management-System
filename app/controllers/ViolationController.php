@@ -560,7 +560,7 @@ class ViolationController extends Controller
     }
 
     // =========================================================================
-    // GET /violations/{id}/edit  (stub)
+    // GET /violations/{id}/edit
     // =========================================================================
 
     public function edit(int $id): void
@@ -573,40 +573,179 @@ class ViolationController extends Controller
             $this->abort(404, 'Violation not found.');
         }
 
+        $authUser = Session::user();
+
+        // Teachers can only edit their own pending cases.
+        if ($authUser['role'] === 'teacher') {
+            if ($violation['reported_by'] != $authUser['id']) {
+                $this->abort(403, 'You can only edit violations that you reported.');
+            }
+            if ($violation['status'] !== 'pending') {
+                Session::flash('error', 'You can only edit pending cases. This case is currently ' . str_replace('_', ' ', $violation['status']) . '.');
+                $this->redirect(APP_URL . '/violations/' . $id);
+            }
+        }
+
+        // Admins can edit any case unless it is closed.
+        if ($authUser['role'] === 'admin') {
+            if ($violation['status'] === 'closed') {
+                Session::flash('error', 'Closed cases cannot be edited.');
+                $this->redirect(APP_URL . '/violations/' . $id);
+            }
+        }
+
         $vm = $this->violationModel();
+
+        $students = $this->userModel()->allStudents();
+        $old      = Session::getFlash('old') ?? $violation;
 
         $this->view('violations.edit', [
             'title'      => 'Edit Violation #' . $id . ' — ' . APP_NAME,
             'pageTitle'  => 'Edit Violation',
             'violation'  => $violation,
+            'students'   => $students,
             'categories' => $vm->getCategories(),
             'severities' => $vm->getSeverityLevels(),
+            'old'        => $old,
             'errors'     => Session::getFlash('errors') ?? [],
         ]);
     }
 
     // =========================================================================
-    // POST /violations/{id}  (stub)
+    // POST /violations/{id}
     // =========================================================================
 
     public function update(int $id): void
     {
         authorize(['admin', 'teacher']);
 
-        Session::flash('info', 'Violation editing will be available in the next phase.');
+        $vm = $this->violationModel();
+        $violation = $vm->findWithDetails($id);
+
+        if (!$violation) {
+            $this->abort(404, 'Violation not found.');
+        }
+
+        $authUser = Session::user();
+
+        // Teachers can only edit their own pending cases.
+        if ($authUser['role'] === 'teacher') {
+            if ($violation['reported_by'] != $authUser['id']) {
+                $this->abort(403, 'You can only edit violations that you reported.');
+            }
+            if ($violation['status'] !== 'pending') {
+                Session::flash('error', 'You can only edit pending cases.');
+                $this->redirect(APP_URL . '/violations/' . $id);
+            }
+        }
+
+        // Admins can edit any case unless it is closed.
+        if ($authUser['role'] === 'admin') {
+            if ($violation['status'] === 'closed') {
+                Session::flash('error', 'Closed cases cannot be edited.');
+                $this->redirect(APP_URL . '/violations/' . $id);
+            }
+        }
+
+        $data     = $this->collectInput();
+        $errors   = $this->validateInput($data);
+
+        if (!empty($errors)) {
+            Session::flash('errors', $errors);
+            Session::flash('old', $data);
+            $this->redirect(APP_URL . '/violations/' . $id . '/edit');
+        }
+
+        $updated = $vm->updateViolation($id, [
+            'student_id'    => $data['student_id'],
+            'type'          => $data['type'],
+            'description'   => $data['description'],
+            'severity'      => $data['severity'],
+            'incident_date' => $data['incident_date'],
+        ]);
+
+        if (!$updated) {
+            Session::flash('error', 'Failed to update the violation report. No changes made or a database error occurred.');
+            $this->redirect(APP_URL . '/violations/' . $id . '/edit');
+        }
+
+        // Audit log
+        $this->auditModel()->createLog([
+            'user_id'     => $authUser['id'],
+            'action'      => 'violation.updated',
+            'target_type' => 'Violation',
+            'target_id'   => $id,
+            'detail'      => [
+                'type'       => $data['type'],
+                'severity'   => $data['severity'],
+                'student_id' => $data['student_id'],
+            ],
+            'ip_address'  => $_SERVER['REMOTE_ADDR']     ?? null,
+            'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        ]);
+
+        // Violation action record
+        $this->actionModel()->createAction([
+            'violation_id' => $id,
+            'actor_id'     => $authUser['id'],
+            'action_type'  => 'case_updated',
+            'note'         => 'Violation details were updated.',
+        ]);
+
+        Session::flash('success', 'Violation report updated successfully.');
         $this->redirect(APP_URL . '/violations/' . $id);
     }
 
     // =========================================================================
-    // POST /violations/{id}/delete  (stub)
+    // POST /violations/{id}/delete
     // =========================================================================
 
     public function delete(int $id): void
     {
         authorize(['admin']);
 
-        Session::flash('info', 'Violation deletion will be available in the next phase.');
-        $this->redirect(APP_URL . '/violations/' . $id);
+        $vm = $this->violationModel();
+        $violation = $vm->findWithDetails($id);
+
+        if (!$violation) {
+            $this->abort(404, 'Violation not found.');
+        }
+
+        $evidenceModel = $this->evidenceModel();
+        $evidenceFiles = $evidenceModel->findByViolation($id);
+
+        // Delete evidence files from disk and DB
+        foreach ($evidenceFiles as $file) {
+            $absPath = BASE_PATH . '/public/' . ltrim($file['file_path'], '/');
+            if (file_exists($absPath)) {
+                @unlink($absPath);
+            }
+            $evidenceModel->deleteEvidence($file['id']);
+        }
+
+        // Action history and audit logs might be orphaned, but we'll let them stay for history, or if DB cascades, it's fine.
+        // Usually, we should keep the audit log that it was deleted.
+
+        $deleted = $vm->deleteViolation($id);
+
+        if ($deleted) {
+            $authUser = Session::user();
+            $this->auditModel()->createLog([
+                'user_id'     => $authUser['id'],
+                'action'      => 'violation.deleted',
+                'target_type' => 'Violation',
+                'target_id'   => $id,
+                'detail'      => ['deleted_violation_id' => $id],
+                'ip_address'  => $_SERVER['REMOTE_ADDR']     ?? null,
+                'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
+            ]);
+
+            Session::flash('success', 'Violation report deleted successfully.');
+        } else {
+            Session::flash('error', 'Failed to delete the violation report.');
+        }
+
+        $this->redirect(APP_URL . '/violations');
     }
 
     // =========================================================================
