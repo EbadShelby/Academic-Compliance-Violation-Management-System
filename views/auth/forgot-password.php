@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sign in to the Academic Compliance & Violation Management System.">
-    <title><?= htmlspecialchars($title ?? 'Login — ' . APP_NAME) ?></title>
+    <meta name="description" content="Reset your password for the Academic Compliance & Violation Management System.">
+    <title><?= htmlspecialchars($title ?? 'Forgot Password — ' . APP_NAME) ?></title>
 
     <!-- Bootstrap 5.3 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
@@ -137,6 +137,7 @@
             font-size: .875rem;
             color: var(--text-muted);
             margin-bottom: 2rem;
+            line-height: 1.5;
         }
 
         /* ── Alerts ───────────────────────────────────────────────────────── */
@@ -176,7 +177,7 @@
         /* ── Inputs ───────────────────────────────────────────────────────── */
         .input-wrapper {
             position: relative;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.75rem;
         }
 
         .input-icon {
@@ -211,42 +212,6 @@
         }
         .form-control-custom:focus ~ .input-icon { color: var(--brand-primary); }
 
-        /* Password toggle */
-        .pw-toggle {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            padding: 0;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 1rem;
-            transition: color .2s;
-            line-height: 1;
-        }
-        .pw-toggle:hover { color: var(--text-primary); }
-
-        /* ── Remember me ──────────────────────────────────────────────────── */
-        .remember-row {
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-            margin-bottom: 1.75rem;
-        }
-        .remember-row input[type="checkbox"] {
-            width: 1rem; height: 1rem;
-            accent-color: var(--brand-primary);
-            cursor: pointer;
-        }
-        .remember-label {
-            font-size: .875rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            user-select: none;
-        }
-
         /* ── Submit button ────────────────────────────────────────────────── */
         .btn-login {
             width: 100%;
@@ -280,50 +245,19 @@
         }
         .btn-login:hover::before { transform: translateX(100%); }
 
-        /* ── Divider ──────────────────────────────────────────────────────── */
-        .divider {
+        /* ── Back to login ────────────────────────────────────────────────── */
+        .back-link {
+            display: block;
             text-align: center;
-            position: relative;
-            margin: 1.75rem 0 1.25rem;
-            font-size: .8125rem;
-            color: var(--text-muted);
-        }
-        .divider::before, .divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: calc(50% - 2.5rem);
-            height: 1px;
-            background: var(--border-subtle);
-        }
-        .divider::before { left: 0; }
-        .divider::after  { right: 0; }
-
-        /* ── Footer text ──────────────────────────────────────────────────── */
-        .login-footer {
-            text-align: center;
-            font-size: .8125rem;
-            color: var(--text-muted);
             margin-top: 1.5rem;
+            font-size: .875rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color .2s;
         }
-
-        /* ── Role pills ───────────────────────────────────────────────────── */
-        .role-pills {
-            display: flex;
-            gap: .5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
+        .back-link:hover {
+            color: var(--text-primary);
         }
-        .role-pill {
-            padding: .25rem .75rem;
-            border-radius: 999px;
-            font-size: .75rem;
-            font-weight: 600;
-            letter-spacing: .04em;
-        }
-        .pill-admin   { background: rgba(79,70,229,.2);   color: #818cf8; border: 1px solid rgba(79,70,229,.4);  }
-        .pill-teacher { background: rgba(6,182,212,.15);  color: #67e8f9; border: 1px solid rgba(6,182,212,.35); }
-        .pill-student { background: rgba(52,211,153,.15); color: #6ee7b7; border: 1px solid rgba(52,211,153,.3); }
 
         /* ── Responsive ───────────────────────────────────────────────────── */
         @media (max-width: 480px) {
@@ -343,18 +277,11 @@
 
         <!-- Brand -->
         <div class="brand-icon" aria-hidden="true">
-            <i class="bi bi-shield-lock-fill"></i>
+            <i class="bi bi-key-fill"></i>
         </div>
 
-        <h1 class="login-title">Welcome back</h1>
-        <p class="login-subtitle">Sign in to <?= htmlspecialchars(APP_NAME) ?></p>
-
-        <!-- Role indicators -->
-        <div class="role-pills" aria-label="Supported roles">
-            <span class="role-pill pill-admin"><i class="bi bi-star-fill me-1"></i>Admin</span>
-            <span class="role-pill pill-teacher"><i class="bi bi-person-video2 me-1"></i>Teacher</span>
-            <span class="role-pill pill-student"><i class="bi bi-mortarboard-fill me-1"></i>Student</span>
-        </div>
+        <h1 class="login-title">Forgot Password</h1>
+        <p class="login-subtitle">Enter your email address and we'll send you a link to reset your password.</p>
 
         <!-- Error alert -->
         <?php if (!empty($error)): ?>
@@ -364,7 +291,7 @@
         </div>
         <?php endif; ?>
 
-        <!-- Success alert (e.g. after logout) -->
+        <!-- Success alert -->
         <?php if (!empty($success)): ?>
         <div class="alert-custom alert-success" role="alert">
             <i class="bi bi-check-circle-fill flex-shrink-0" style="margin-top:1px;"></i>
@@ -372,8 +299,8 @@
         </div>
         <?php endif; ?>
 
-        <!-- Login Form -->
-        <form id="loginForm" method="POST" action="<?= APP_URL ?>/login" novalidate>
+        <!-- Forgot Password Form -->
+        <form id="forgotPasswordForm" method="POST" action="<?= APP_URL ?>/forgot-password" novalidate>
             <?= csrf_field() ?>
 
             <!-- Email -->
@@ -395,59 +322,23 @@
                 </div>
             </div>
 
-            <!-- Password -->
-            <div>
-                <label for="password" class="form-label-custom">Password</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-lock input-icon" aria-hidden="true"></i>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-control-custom"
-                        placeholder="••••••••"
-                        autocomplete="current-password"
-                        required
-                    >
-                    <button
-                        type="button"
-                        class="pw-toggle"
-                        id="pwToggle"
-                        aria-label="Toggle password visibility"
-                        aria-pressed="false"
-                    >
-                        <i class="bi bi-eye" id="pwToggleIcon" aria-hidden="true"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Remember me & Forgot Password -->
-            <div class="remember-row" style="justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: .5rem;">
-                    <input type="checkbox" id="remember" name="remember" value="1">
-                    <label for="remember" class="remember-label">Keep me signed in</label>
-                </div>
-                <a href="<?= APP_URL ?>/forgot-password" class="remember-label" style="text-decoration: none; color: var(--brand-primary); font-weight: 500;">Forgot Password?</a>
-            </div>
-
             <!-- Submit -->
-            <button type="submit" class="btn-login" id="btnLogin">
-                <span id="btnLoginText">
-                    <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Sign in
+            <button type="submit" class="btn-login" id="btnSubmit">
+                <span id="btnSubmitText">
+                    <i class="bi bi-send-fill me-2" aria-hidden="true"></i>Send Reset Link
                 </span>
-                <span id="btnLoginSpinner" class="d-none">
+                <span id="btnSubmitSpinner" class="d-none">
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    Signing in…
+                    Sending…
                 </span>
             </button>
 
-        </form>
+            <!-- Back to Login -->
+            <a href="<?= APP_URL ?>/login" class="back-link">
+                <i class="bi bi-arrow-left me-1"></i> Back to sign in
+            </a>
 
-        <!-- Footer -->
-        <p class="login-footer">
-            <i class="bi bi-shield-check me-1" aria-hidden="true"></i>
-            Secured with end-to-end encryption
-        </p>
+        </form>
 
     </div><!-- /.login-card -->
 </div><!-- /.login-bg -->
@@ -456,28 +347,15 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // ── Password visibility toggle ────────────────────────────────────────────
-    const pwInput   = document.getElementById('password');
-    const pwToggle  = document.getElementById('pwToggle');
-    const pwIcon    = document.getElementById('pwToggleIcon');
-
-    pwToggle.addEventListener('click', () => {
-        const visible = pwInput.type === 'text';
-        pwInput.type  = visible ? 'password' : 'text';
-        pwIcon.className = visible ? 'bi bi-eye' : 'bi bi-eye-slash';
-        pwToggle.setAttribute('aria-pressed', String(!visible));
-    });
-
     // ── Loading state on submit ───────────────────────────────────────────────
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
-        const email    = document.getElementById('email').value.trim();
-        const password = pwInput.value.trim();
+    document.getElementById('forgotPasswordForm').addEventListener('submit', function (e) {
+        const email = document.getElementById('email').value.trim();
 
-        if (!email || !password) return; // let HTML5 handle it
+        if (!email) return; // let HTML5 handle it
 
-        const btnText    = document.getElementById('btnLoginText');
-        const btnSpinner = document.getElementById('btnLoginSpinner');
-        const btn        = document.getElementById('btnLogin');
+        const btnText    = document.getElementById('btnSubmitText');
+        const btnSpinner = document.getElementById('btnSubmitSpinner');
+        const btn        = document.getElementById('btnSubmit');
 
         btnText.classList.add('d-none');
         btnSpinner.classList.remove('d-none');

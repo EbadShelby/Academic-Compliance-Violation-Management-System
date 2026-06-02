@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sign in to the Academic Compliance & Violation Management System.">
-    <title><?= htmlspecialchars($title ?? 'Login — ' . APP_NAME) ?></title>
+    <meta name="description" content="Set a new password for the Academic Compliance & Violation Management System.">
+    <title><?= htmlspecialchars($title ?? 'Reset Password — ' . APP_NAME) ?></title>
 
     <!-- Bootstrap 5.3 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
@@ -137,6 +137,7 @@
             font-size: .875rem;
             color: var(--text-muted);
             margin-bottom: 2rem;
+            line-height: 1.5;
         }
 
         /* ── Alerts ───────────────────────────────────────────────────────── */
@@ -155,11 +156,6 @@
             border: 1px solid rgba(248,113,113,.3);
             color: var(--error-red);
         }
-        .alert-success {
-            background: rgba(52,211,153,.12);
-            border: 1px solid rgba(52,211,153,.3);
-            color: var(--success-green);
-        }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* ── Form labels ──────────────────────────────────────────────────── */
@@ -176,7 +172,7 @@
         /* ── Inputs ───────────────────────────────────────────────────────── */
         .input-wrapper {
             position: relative;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.75rem;
         }
 
         .input-icon {
@@ -228,25 +224,6 @@
         }
         .pw-toggle:hover { color: var(--text-primary); }
 
-        /* ── Remember me ──────────────────────────────────────────────────── */
-        .remember-row {
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-            margin-bottom: 1.75rem;
-        }
-        .remember-row input[type="checkbox"] {
-            width: 1rem; height: 1rem;
-            accent-color: var(--brand-primary);
-            cursor: pointer;
-        }
-        .remember-label {
-            font-size: .875rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            user-select: none;
-        }
-
         /* ── Submit button ────────────────────────────────────────────────── */
         .btn-login {
             width: 100%;
@@ -280,50 +257,19 @@
         }
         .btn-login:hover::before { transform: translateX(100%); }
 
-        /* ── Divider ──────────────────────────────────────────────────────── */
-        .divider {
+        /* ── Back to login ────────────────────────────────────────────────── */
+        .back-link {
+            display: block;
             text-align: center;
-            position: relative;
-            margin: 1.75rem 0 1.25rem;
-            font-size: .8125rem;
-            color: var(--text-muted);
-        }
-        .divider::before, .divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: calc(50% - 2.5rem);
-            height: 1px;
-            background: var(--border-subtle);
-        }
-        .divider::before { left: 0; }
-        .divider::after  { right: 0; }
-
-        /* ── Footer text ──────────────────────────────────────────────────── */
-        .login-footer {
-            text-align: center;
-            font-size: .8125rem;
-            color: var(--text-muted);
             margin-top: 1.5rem;
+            font-size: .875rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color .2s;
         }
-
-        /* ── Role pills ───────────────────────────────────────────────────── */
-        .role-pills {
-            display: flex;
-            gap: .5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
+        .back-link:hover {
+            color: var(--text-primary);
         }
-        .role-pill {
-            padding: .25rem .75rem;
-            border-radius: 999px;
-            font-size: .75rem;
-            font-weight: 600;
-            letter-spacing: .04em;
-        }
-        .pill-admin   { background: rgba(79,70,229,.2);   color: #818cf8; border: 1px solid rgba(79,70,229,.4);  }
-        .pill-teacher { background: rgba(6,182,212,.15);  color: #67e8f9; border: 1px solid rgba(6,182,212,.35); }
-        .pill-student { background: rgba(52,211,153,.15); color: #6ee7b7; border: 1px solid rgba(52,211,153,.3); }
 
         /* ── Responsive ───────────────────────────────────────────────────── */
         @media (max-width: 480px) {
@@ -343,18 +289,11 @@
 
         <!-- Brand -->
         <div class="brand-icon" aria-hidden="true">
-            <i class="bi bi-shield-lock-fill"></i>
+            <i class="bi bi-shield-lock"></i>
         </div>
 
-        <h1 class="login-title">Welcome back</h1>
-        <p class="login-subtitle">Sign in to <?= htmlspecialchars(APP_NAME) ?></p>
-
-        <!-- Role indicators -->
-        <div class="role-pills" aria-label="Supported roles">
-            <span class="role-pill pill-admin"><i class="bi bi-star-fill me-1"></i>Admin</span>
-            <span class="role-pill pill-teacher"><i class="bi bi-person-video2 me-1"></i>Teacher</span>
-            <span class="role-pill pill-student"><i class="bi bi-mortarboard-fill me-1"></i>Student</span>
-        </div>
+        <h1 class="login-title">Reset Password</h1>
+        <p class="login-subtitle">Please create a new, strong password for your account.</p>
 
         <!-- Error alert -->
         <?php if (!empty($error)): ?>
@@ -364,40 +303,15 @@
         </div>
         <?php endif; ?>
 
-        <!-- Success alert (e.g. after logout) -->
-        <?php if (!empty($success)): ?>
-        <div class="alert-custom alert-success" role="alert">
-            <i class="bi bi-check-circle-fill flex-shrink-0" style="margin-top:1px;"></i>
-            <span><?= htmlspecialchars($success) ?></span>
-        </div>
-        <?php endif; ?>
-
-        <!-- Login Form -->
-        <form id="loginForm" method="POST" action="<?= APP_URL ?>/login" novalidate>
+        <!-- Reset Password Form -->
+        <form id="resetPasswordForm" method="POST" action="<?= APP_URL ?>/reset-password" novalidate>
             <?= csrf_field() ?>
+            <input type="hidden" name="token" value="<?= htmlspecialchars($token ?? '') ?>">
+            <input type="hidden" name="email" value="<?= htmlspecialchars($email ?? '') ?>">
 
-            <!-- Email -->
+            <!-- New Password -->
             <div>
-                <label for="email" class="form-label-custom">Email address</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-envelope input-icon" aria-hidden="true"></i>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        class="form-control-custom"
-                        placeholder="you@school.edu"
-                        value="<?= htmlspecialchars($old['email'] ?? '') ?>"
-                        autocomplete="email"
-                        required
-                        autofocus
-                    >
-                </div>
-            </div>
-
-            <!-- Password -->
-            <div>
-                <label for="password" class="form-label-custom">Password</label>
+                <label for="password" class="form-label-custom">New Password</label>
                 <div class="input-wrapper">
                     <i class="bi bi-lock input-icon" aria-hidden="true"></i>
                     <input
@@ -405,49 +319,49 @@
                         id="password"
                         name="password"
                         class="form-control-custom"
-                        placeholder="••••••••"
-                        autocomplete="current-password"
+                        placeholder="Min 8 characters"
                         required
+                        autofocus
+                        minlength="8"
                     >
-                    <button
-                        type="button"
-                        class="pw-toggle"
-                        id="pwToggle"
-                        aria-label="Toggle password visibility"
-                        aria-pressed="false"
-                    >
-                        <i class="bi bi-eye" id="pwToggleIcon" aria-hidden="true"></i>
+                    <button type="button" class="pw-toggle" id="pwToggle1" aria-label="Toggle password visibility">
+                        <i class="bi bi-eye" id="pwToggleIcon1" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Remember me & Forgot Password -->
-            <div class="remember-row" style="justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: .5rem;">
-                    <input type="checkbox" id="remember" name="remember" value="1">
-                    <label for="remember" class="remember-label">Keep me signed in</label>
+            <!-- Confirm Password -->
+            <div>
+                <label for="password_confirmation" class="form-label-custom">Confirm Password</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-lock-fill input-icon" aria-hidden="true"></i>
+                    <input
+                        type="password"
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        class="form-control-custom"
+                        placeholder="Re-enter password"
+                        required
+                        minlength="8"
+                    >
+                    <button type="button" class="pw-toggle" id="pwToggle2" aria-label="Toggle password visibility">
+                        <i class="bi bi-eye" id="pwToggleIcon2" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <a href="<?= APP_URL ?>/forgot-password" class="remember-label" style="text-decoration: none; color: var(--brand-primary); font-weight: 500;">Forgot Password?</a>
             </div>
 
             <!-- Submit -->
-            <button type="submit" class="btn-login" id="btnLogin">
-                <span id="btnLoginText">
-                    <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Sign in
+            <button type="submit" class="btn-login" id="btnSubmit">
+                <span id="btnSubmitText">
+                    <i class="bi bi-check2-circle me-2" aria-hidden="true"></i>Reset Password
                 </span>
-                <span id="btnLoginSpinner" class="d-none">
+                <span id="btnSubmitSpinner" class="d-none">
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    Signing in…
+                    Saving…
                 </span>
             </button>
 
         </form>
-
-        <!-- Footer -->
-        <p class="login-footer">
-            <i class="bi bi-shield-check me-1" aria-hidden="true"></i>
-            Secured with end-to-end encryption
-        </p>
 
     </div><!-- /.login-card -->
 </div><!-- /.login-bg -->
@@ -457,27 +371,38 @@
 
 <script>
     // ── Password visibility toggle ────────────────────────────────────────────
-    const pwInput   = document.getElementById('password');
-    const pwToggle  = document.getElementById('pwToggle');
-    const pwIcon    = document.getElementById('pwToggleIcon');
+    function setupToggle(inputId, toggleId, iconId) {
+        const input = document.getElementById(inputId);
+        const toggle = document.getElementById(toggleId);
+        const icon = document.getElementById(iconId);
 
-    pwToggle.addEventListener('click', () => {
-        const visible = pwInput.type === 'text';
-        pwInput.type  = visible ? 'password' : 'text';
-        pwIcon.className = visible ? 'bi bi-eye' : 'bi bi-eye-slash';
-        pwToggle.setAttribute('aria-pressed', String(!visible));
-    });
+        toggle.addEventListener('click', () => {
+            const visible = input.type === 'text';
+            input.type = visible ? 'password' : 'text';
+            icon.className = visible ? 'bi bi-eye' : 'bi bi-eye-slash';
+            toggle.setAttribute('aria-pressed', String(!visible));
+        });
+    }
+
+    setupToggle('password', 'pwToggle1', 'pwToggleIcon1');
+    setupToggle('password_confirmation', 'pwToggle2', 'pwToggleIcon2');
 
     // ── Loading state on submit ───────────────────────────────────────────────
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
-        const email    = document.getElementById('email').value.trim();
-        const password = pwInput.value.trim();
+    document.getElementById('resetPasswordForm').addEventListener('submit', function (e) {
+        const p1 = document.getElementById('password').value.trim();
+        const p2 = document.getElementById('password_confirmation').value.trim();
 
-        if (!email || !password) return; // let HTML5 handle it
+        if (!p1 || !p2) return; // Let HTML5 validation handle empty fields
 
-        const btnText    = document.getElementById('btnLoginText');
-        const btnSpinner = document.getElementById('btnLoginSpinner');
-        const btn        = document.getElementById('btnLogin');
+        if (p1 !== p2) {
+            e.preventDefault();
+            alert("Passwords do not match.");
+            return;
+        }
+
+        const btnText    = document.getElementById('btnSubmitText');
+        const btnSpinner = document.getElementById('btnSubmitSpinner');
+        const btn        = document.getElementById('btnSubmit');
 
         btnText.classList.add('d-none');
         btnSpinner.classList.remove('d-none');

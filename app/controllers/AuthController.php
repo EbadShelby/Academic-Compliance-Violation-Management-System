@@ -149,4 +149,176 @@ class AuthController extends Controller
         Session::flash('success', 'You have been logged out successfully.');
         $this->redirect(APP_URL . '/login');
     }
+    // ── Forgot Password ───────────────────────────────────────────────────────
+
+    /**
+     * GET /forgot-password
+     * Show the forgot password form.
+     */
+    public function showForgotPassword(): void
+    {
+        if (Session::isLoggedIn()) {
+            $this->redirect(APP_URL . '/dashboard');
+        }
+
+        $this->view('auth.forgot-password', [
+            'title'   => 'Forgot Password — ' . APP_NAME,
+            'error'   => Session::getFlash('error'),
+            'success' => Session::getFlash('success'),
+            'old'     => Session::getFlash('old') ?? [],
+        ], '');
+    }
+
+    /**
+     * POST /forgot-password
+     * Handle the forgot password submission and send the reset email.
+     */
+    public function sendResetLink(): void
+    {
+        // 0. Rate Limiting for forgot password
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        /** @var AuditLog $auditLogModel */
+        $auditLogModel = $this->model('AuditLog');
+        
+        if ($auditLogModel->countFailedLoginsByIp($ip, 15) >= 10) {
+            Session::flash('error', 'Too many requests. Please try again later.');
+            $this->redirect(APP_URL . '/forgot-password');
+        }
+
+        $email = trim($_POST['email'] ?? '');
+        Session::flash('old', ['email' => $email]);
+
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Session::flash('error', 'Please enter a valid email address.');
+            $this->redirect(APP_URL . '/forgot-password');
+        }
+
+        /** @var User $userModel */
+        $userModel = $this->model('User');
+        $user = $userModel->findByEmail($email);
+
+        // ALWAYS show success message to prevent user enumeration
+        $successMessage = 'If that email is in our system, we have sent a password reset link.';
+
+        if ($user && isset($user['is_active']) && (int) $user['is_active'] === 1) {
+            /** @var PasswordReset $resetModel */
+            $resetModel = $this->model('PasswordReset');
+            
+            try {
+                $rawToken = $resetModel->createToken($email);
+                
+                // Build the reset link
+                $resetLink = APP_URL . '/reset-password?token=' . urlencode($rawToken) . '&email=' . urlencode($email);
+                
+                $htmlBody = '
+                    <p>Hello ' . htmlspecialchars($user['first_name']) . ',</p>
+                    <p>You recently requested to reset your password for your ' . htmlspecialchars(APP_NAME) . ' account. Click the button below to reset it.</p>
+                    <a href="' . htmlspecialchars($resetLink) . '" class="btn">Reset Password</a>
+                    <p>If you did not request a password reset, please ignore this email. This link will expire in 1 hour.</p>
+                    <p>Or copy and paste this link into your browser:</p>
+                    <p><a href="' . htmlspecialchars($resetLink) . '">' . htmlspecialchars($resetLink) . '</a></p>
+                ';
+                
+                require_once BASE_PATH . '/app/services/MailerService.php';
+                $mailer = new MailerService();
+                $mailer->sendHtml($email, 'Password Reset Request', $htmlBody);
+                
+                // Include the reset link in the audit log as a fallback for testing in environments where mail() is disabled
+                logAction('auth.password_reset_requested', 'User', (int)$user['id'], [
+                    'email' => $email,
+                    'reset_link' => $resetLink
+                ]);
+
+            } catch (Exception $e) {
+                // Log error but don't show to user
+                error_log('Password reset error: ' . $e->getMessage());
+            }
+        }
+
+        Session::flash('success', $successMessage);
+        $this->redirect(APP_URL . '/forgot-password');
+    }
+
+    // ── Reset Password ────────────────────────────────────────────────────────
+
+    /**
+     * GET /reset-password
+     * Show the reset password form.
+     */
+    public function showResetPassword(): void
+    {
+        if (Session::isLoggedIn()) {
+            $this->redirect(APP_URL . '/dashboard');
+        }
+
+        $token = $_GET['token'] ?? '';
+        $email = $_GET['email'] ?? '';
+
+        if (empty($token) || empty($email)) {
+            Session::flash('error', 'Invalid or missing password reset token.');
+            $this->redirect(APP_URL . '/login');
+        }
+
+        $this->view('auth.reset-password', [
+            'title' => 'Reset Password — ' . APP_NAME,
+            'error' => Session::getFlash('error'),
+            'token' => $token,
+            'email' => $email
+        ], '');
+    }
+
+    /**
+     * POST /reset-password
+     * Handle the actual password reset.
+     */
+    public function resetPassword(): void
+    {
+        $token = $_POST['token'] ?? '';
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $passwordConfirm = $_POST['password_confirmation'] ?? '';
+
+        if (empty($token) || empty($email) || empty($password) || empty($passwordConfirm)) {
+            Session::flash('error', 'All fields are required.');
+            $this->redirect(APP_URL . '/reset-password?token=' . urlencode($token) . '&email=' . urlencode($email));
+        }
+
+        if ($password !== $passwordConfirm) {
+            Session::flash('error', 'Passwords do not match.');
+            $this->redirect(APP_URL . '/reset-password?token=' . urlencode($token) . '&email=' . urlencode($email));
+        }
+
+        if (strlen($password) < 8) {
+            Session::flash('error', 'Password must be at least 8 characters long.');
+            $this->redirect(APP_URL . '/reset-password?token=' . urlencode($token) . '&email=' . urlencode($email));
+        }
+
+        /** @var PasswordReset $resetModel */
+        $resetModel = $this->model('PasswordReset');
+        
+        if (!$resetModel->isValid($email, $token)) {
+            Session::flash('error', 'This password reset token is invalid or has expired.');
+            $this->redirect(APP_URL . '/login');
+        }
+
+        /** @var User $userModel */
+        $userModel = $this->model('User');
+        $user = $userModel->findByEmail($email);
+
+        if (!$user) {
+            Session::flash('error', 'An error occurred. Please try again.');
+            $this->redirect(APP_URL . '/login');
+        }
+
+        // Update password
+        $userModel->resetPassword((int)$user['id'], $password);
+        
+        // Invalidate tokens
+        $resetModel->deleteByEmail($email);
+        
+        logAction('auth.password_reset_completed', 'User', (int)$user['id'], ['email' => $email]);
+
+        Session::flash('success', 'Your password has been successfully reset. You can now log in.');
+        $this->redirect(APP_URL . '/login');
+    }
 }

@@ -15,6 +15,12 @@ $router->get('/login',  'AuthController@showLogin');
 $router->post('/login', 'AuthController@login');
 $router->get('/logout', 'AuthController@logout');
 
+// ── Password Reset ───────────────────────────────────────────────────────────
+$router->get('/forgot-password', 'AuthController@showForgotPassword');
+$router->post('/forgot-password','AuthController@sendResetLink');
+$router->get('/reset-password',  'AuthController@showResetPassword');
+$router->post('/reset-password', 'AuthController@resetPassword');
+
 // ── Profile ──────────────────────────────────────────────────────────────────
 $router->get('/profile',               'ProfileController@index');
 $router->post('/profile/update',       'ProfileController@update');

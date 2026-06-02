@@ -54,3 +54,9 @@ function env(string $key, mixed $default = null): mixed
     $value = $_ENV[$key] ?? getenv($key);
     return ($value !== false && $value !== null) ? $value : $default;
 }
+
+// ── SMTP constants ───────────────────────────────────────────────────────────
+defined('SMTP_HOST') || define('SMTP_HOST', env('SMTP_HOST', 'smtp.gmail.com'));
+defined('SMTP_PORT') || define('SMTP_PORT', (int) env('SMTP_PORT', 587));
+defined('SMTP_USER') || define('SMTP_USER', env('SMTP_USER', ''));
+defined('SMTP_PASS') || define('SMTP_PASS', env('SMTP_PASS', ''));
