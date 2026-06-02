@@ -307,23 +307,6 @@
             margin-top: 1.5rem;
         }
 
-        /* ── Role pills ───────────────────────────────────────────────────── */
-        .role-pills {
-            display: flex;
-            gap: .5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-        }
-        .role-pill {
-            padding: .25rem .75rem;
-            border-radius: 999px;
-            font-size: .75rem;
-            font-weight: 600;
-            letter-spacing: .04em;
-        }
-        .pill-admin   { background: rgba(79,70,229,.2);   color: #818cf8; border: 1px solid rgba(79,70,229,.4);  }
-        .pill-teacher { background: rgba(6,182,212,.15);  color: #67e8f9; border: 1px solid rgba(6,182,212,.35); }
-        .pill-student { background: rgba(52,211,153,.15); color: #6ee7b7; border: 1px solid rgba(52,211,153,.3); }
 
         /* ── Responsive ───────────────────────────────────────────────────── */
         @media (max-width: 480px) {
@@ -349,12 +332,7 @@
         <h1 class="login-title">Welcome back</h1>
         <p class="login-subtitle">Sign in to <?= htmlspecialchars(APP_NAME) ?></p>
 
-        <!-- Role indicators -->
-        <div class="role-pills" aria-label="Supported roles">
-            <span class="role-pill pill-admin"><i class="bi bi-star-fill me-1"></i>Admin</span>
-            <span class="role-pill pill-teacher"><i class="bi bi-person-video2 me-1"></i>Teacher</span>
-            <span class="role-pill pill-student"><i class="bi bi-mortarboard-fill me-1"></i>Student</span>
-        </div>
+
 
         <!-- Error alert -->
         <?php if (!empty($error)): ?>
