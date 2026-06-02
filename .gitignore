@@ -1,6 +1,5 @@
 # Environment / secrets
 .env
-.env.*
 
 # Uploaded evidence files (user data — never commit)
 storage/
