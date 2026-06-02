@@ -76,7 +76,7 @@ class ViolationController extends Controller
      */
     public function index(): void
     {
-        authorize(['admin', 'teacher', 'student']);
+        authorize(['admin', 'teacher', 'student', 'registrar']);
 
         $vm       = $this->violationModel();
         $authUser = Session::user();
@@ -108,7 +108,7 @@ class ViolationController extends Controller
      */
     public function export(): void
     {
-        authorize(['admin']);
+        authorize(['admin', 'registrar']);
 
         $vm = $this->violationModel();
         $violations = $vm->allWithDetails();
@@ -143,7 +143,7 @@ class ViolationController extends Controller
 
     public function create(): void
     {
-        authorize(['teacher', 'admin']);
+        authorize(['teacher', 'admin', 'registrar']);
 
         $vm       = $this->violationModel();
         $students = $this->userModel()->allStudents();
@@ -166,7 +166,7 @@ class ViolationController extends Controller
 
     public function store(): void
     {
-        authorize(['teacher', 'admin']);
+        authorize(['teacher', 'admin', 'registrar']);
 
         $authUser = Session::user();
         $data     = $this->collectInput();
@@ -240,7 +240,7 @@ class ViolationController extends Controller
 
     public function show(int $id): void
     {
-        authorize(['admin', 'teacher', 'student']);
+        authorize(['admin', 'teacher', 'student', 'registrar']);
 
         $violation = $this->violationModel()->findWithDetails($id);
 
@@ -276,7 +276,7 @@ class ViolationController extends Controller
      */
     public function review(int $id): void
     {
-        authorize(['admin']);
+        authorize(['admin', 'registrar']);
 
         $vm        = $this->violationModel();
         $violation = $vm->findWithDetails($id);
@@ -314,7 +314,7 @@ class ViolationController extends Controller
      */
     public function updateStatus(int $id): void
     {
-        authorize(['admin']);
+        authorize(['admin', 'registrar']);
 
         $vm        = $this->violationModel();
         $violation = $vm->findWithDetails($id);
@@ -402,7 +402,7 @@ class ViolationController extends Controller
      */
     public function reject(int $id): void
     {
-        authorize(['admin']);
+        authorize(['admin', 'registrar']);
 
         $vm        = $this->violationModel();
         $violation = $vm->findWithDetails($id);
@@ -479,7 +479,7 @@ class ViolationController extends Controller
      */
     public function close(int $id): void
     {
-        authorize(['admin']);
+        authorize(['admin', 'registrar']);
 
         $vm        = $this->violationModel();
         $violation = $vm->findWithDetails($id);
@@ -549,7 +549,7 @@ class ViolationController extends Controller
      */
     public function assignSanction(int $id): void
     {
-        authorize(['admin']);
+        authorize(['admin', 'registrar']);
 
         $vm        = $this->violationModel();
         $violation = $vm->findWithDetails($id);
@@ -676,7 +676,7 @@ class ViolationController extends Controller
 
     public function edit(int $id): void
     {
-        authorize(['admin', 'teacher']);
+        authorize(['admin', 'teacher', 'registrar']);
 
         $violation = $this->violationModel()->findWithDetails($id);
 
@@ -698,7 +698,7 @@ class ViolationController extends Controller
         }
 
         // Admins can edit any case unless it is closed.
-        if ($authUser['role'] === 'admin') {
+        if (in_array($authUser['role'], ['admin', 'registrar'])) {
             if ($violation['status'] === 'closed') {
                 Session::flash('error', 'Closed cases cannot be edited.');
                 $this->redirect(APP_URL . '/violations/' . $id);
@@ -728,7 +728,7 @@ class ViolationController extends Controller
 
     public function update(int $id): void
     {
-        authorize(['admin', 'teacher']);
+        authorize(['admin', 'teacher', 'registrar']);
 
         $vm = $this->violationModel();
         $violation = $vm->findWithDetails($id);
@@ -751,7 +751,7 @@ class ViolationController extends Controller
         }
 
         // Admins can edit any case unless it is closed.
-        if ($authUser['role'] === 'admin') {
+        if (in_array($authUser['role'], ['admin', 'registrar'])) {
             if ($violation['status'] === 'closed') {
                 Session::flash('error', 'Closed cases cannot be edited.');
                 $this->redirect(APP_URL . '/violations/' . $id);
@@ -813,7 +813,7 @@ class ViolationController extends Controller
 
     public function delete(int $id): void
     {
-        authorize(['admin']);
+        authorize(['admin', 'registrar']);
 
         $vm = $this->violationModel();
         $violation = $vm->findWithDetails($id);

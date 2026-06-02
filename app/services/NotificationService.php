@@ -307,7 +307,7 @@ class NotificationService
             $stmt = $db->prepare(
                 "SELECT u.id FROM users u
                    JOIN roles r ON u.role_id = r.id
-                  WHERE r.slug = 'admin'
+                  WHERE r.slug IN ('admin', 'registrar')
                     AND u.is_active = 1"
             );
             $stmt->execute();

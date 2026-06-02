@@ -48,7 +48,7 @@ class AIController extends Controller
 
         try {
             // Must be logged in as teacher or admin
-            authorize(['teacher', 'admin']);
+            authorize(['teacher', 'admin', 'registrar']);
 
             // Parse body — support both JSON body and regular POST fields
             $input = $this->parseInput();
@@ -125,7 +125,7 @@ class AIController extends Controller
         ob_start();
 
         try {
-            authorize(['teacher', 'admin']);
+            authorize(['teacher', 'admin', 'registrar']);
 
             $input       = $this->parseInput();
             $description = trim($input['description'] ?? '');
@@ -193,7 +193,7 @@ class AIController extends Controller
 
         try {
             // Case summary is admin-only — teachers don't access the review page
-            authorize(['admin']);
+            authorize(['admin', 'registrar']);
 
             $input       = $this->parseInput();
             $description = trim($input['description'] ?? '');

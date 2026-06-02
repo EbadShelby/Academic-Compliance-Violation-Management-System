@@ -169,12 +169,12 @@ $authUser = Session::user();
             <input type="text" class="search-input" id="violSearch" placeholder="Search violations…" autocomplete="off">
         </div>
         <div class="d-flex align-items-center gap-2">
-            <?php if (isAdmin()): ?>
+            <?php if (isAdmin() || isRegistrar()): ?>
             <a href="<?= APP_URL ?>/violations/export" class="btn btn-sm btn-outline-secondary" style="border-radius:.625rem; padding:.5rem 1rem;">
                 <i class="bi bi-download"></i> Export CSV
             </a>
             <?php endif; ?>
-            <?php if (isTeacher() || isAdmin()): ?>
+            <?php if (isTeacher() || isAdmin() || isRegistrar()): ?>
             <a href="<?= APP_URL ?>/violations/create" class="btn-file-violation">
                 <i class="bi bi-plus-circle"></i> File Violation
             </a>
@@ -188,7 +188,7 @@ $authUser = Session::user();
         <i class="bi bi-exclamation-triangle"></i>
         <p class="mb-1 fw-semibold">No violations found</p>
         <p class="mb-0" style="font-size:.875rem;">
-            <?php if (isTeacher() || isAdmin()): ?>
+            <?php if (isTeacher() || isAdmin() || isRegistrar()): ?>
                 File a new violation report to get started.
             <?php else: ?>
                 You have no violation records at this time.
@@ -242,7 +242,7 @@ $authUser = Session::user();
                     <a href="<?= APP_URL ?>/violations/<?= $v['id'] ?>" class="btn-view-link">
                         <i class="bi bi-eye"></i> View
                     </a>
-                    <?php if (isAdmin()): ?>
+                    <?php if (isAdmin() || isRegistrar()): ?>
                     <a href="<?= APP_URL ?>/violations/<?= $v['id'] ?>/review" class="btn-review-link">
                         <i class="bi bi-clipboard2-check"></i> Review
                     </a>

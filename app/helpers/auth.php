@@ -70,6 +70,14 @@ function isStudent(): bool
 }
 
 /**
+ * Return true if the authenticated user has the 'registrar' role.
+ */
+function isRegistrar(): bool
+{
+    return Session::hasRole('registrar');
+}
+
+/**
  * Return true if the current user's role matches any of the given roles.
  *
  * @param string|string[] $roles  Role slug(s) to check against.

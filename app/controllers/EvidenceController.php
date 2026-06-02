@@ -51,7 +51,7 @@ class EvidenceController extends Controller
      */
     public function upload(int $violationId): void
     {
-        authorize(['admin', 'teacher']);
+        authorize(['admin', 'teacher', 'registrar']);
 
         $authUser  = Session::user();
 
@@ -161,7 +161,7 @@ class EvidenceController extends Controller
      */
     public function show(int $id): void
     {
-        authorize(['admin', 'teacher']);
+        authorize(['admin', 'teacher', 'registrar']);
 
         $em     = $this->evidenceModel();
         $record = $em->find($id);
@@ -201,7 +201,7 @@ class EvidenceController extends Controller
      */
     public function delete(int $id): void
     {
-        authorize('admin');
+        authorize(['admin', 'registrar']);
 
         $em     = $this->evidenceModel();
         $record = $em->find($id);

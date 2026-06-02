@@ -274,7 +274,7 @@ function formatBytes(int $bytes): string {
                                title="View / Download">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <?php if (isAdmin()): ?>
+                            <?php if (isAdmin() || isRegistrar()): ?>
                             <form method="POST"
                                   action="<?= APP_URL ?>/evidence/<?= $ef['id'] ?>/delete"
                                   style="display:inline;"
@@ -297,14 +297,14 @@ function formatBytes(int $bytes): string {
     <div class="col-lg-4">
 
         <!-- ── Actions panel ──────────────────────────────────────────── -->
-        <?php if (isAdmin() || isTeacher()): ?>
+        <?php if (isAdmin() || isTeacher() || isRegistrar()): ?>
         <div class="detail-card mb-4">
             <div class="detail-card-header">
                 <i class="bi bi-lightning-fill"></i>
                 Actions
             </div>
             <div class="detail-card-body d-flex flex-column gap-2">
-                <?php if (isAdmin()): ?>
+                <?php if (isAdmin() || isRegistrar()): ?>
                 <a href="<?= APP_URL ?>/violations/<?= $violation['id'] ?>/review"
                    class="action-btn action-review">
                     <i class="bi bi-clipboard2-check-fill"></i> Review &amp; Manage Case

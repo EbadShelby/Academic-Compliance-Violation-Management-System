@@ -22,6 +22,9 @@ class DashboardController extends Controller
             case 'admin':
                 $this->adminDashboard($user);
                 break;
+            case 'registrar':
+                $this->registrarDashboard($user);
+                break;
             case 'teacher':
                 $this->teacherDashboard($user);
                 break;
@@ -72,6 +75,48 @@ class DashboardController extends Controller
             'severityDist'        => $severityDist,
             'monthlyTrend'        => $monthlyTrend,
             'userCounts'          => $userCounts,
+            'unreadCount'         => $unreadCount,
+            'recentNotifications' => $recentNotifications,
+        ]);
+    }
+
+    /**
+     * Registrar dashboard — similar to admin but no user management.
+     */
+    private function registrarDashboard(array $user): void
+    {
+        $vm  = $this->loadViolationModel();
+        $nm  = $this->loadNotificationModel();
+
+        $totalViolations   = $vm->getTotalViolations();
+        $pendingCases      = $vm->getPendingCases();
+        $resolvedCases     = $vm->getResolvedCases();
+        $underReview       = $vm->getUnderReviewCount();
+        $mostCommonCat     = $vm->getMostCommonCategory();
+        $repeatOffenders   = $vm->getRepeatOffenders(5);
+        $recentViolations  = $vm->getRecentViolations(10);
+        $statusDist        = $vm->getStatusDistribution();
+        $categoryDist      = $vm->getCategoryDistribution();
+        $severityDist      = $vm->getSeverityDistribution();
+        $monthlyTrend      = $vm->getMonthlyTrend(6);
+        $unreadCount       = $nm ? $nm->getUnreadCount((int) $user['id']) : 0;
+        $recentNotifications = $nm ? $nm->getRecentNotifications((int) $user['id'], 5) : [];
+
+        $this->view('dashboard.registrar', [
+            'title'               => 'Registrar Dashboard — ' . APP_NAME,
+            'pageTitle'           => 'Registrar Dashboard',
+            'user'                => $user,
+            'totalViolations'     => $totalViolations,
+            'pendingCases'        => $pendingCases,
+            'resolvedCases'       => $resolvedCases,
+            'underReview'         => $underReview,
+            'mostCommonCat'       => $mostCommonCat,
+            'repeatOffenders'     => $repeatOffenders,
+            'recentViolations'    => $recentViolations,
+            'statusDist'          => $statusDist,
+            'categoryDist'        => $categoryDist,
+            'severityDist'        => $severityDist,
+            'monthlyTrend'        => $monthlyTrend,
             'unreadCount'         => $unreadCount,
             'recentNotifications' => $recentNotifications,
         ]);

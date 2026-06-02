@@ -350,8 +350,8 @@
     </div>
     <?php endif; ?>
 
-    <!-- Teacher nav -->
-    <?php if (Session::hasRole('admin') || Session::hasRole('teacher')): ?>
+    <!-- Teacher/Registrar nav -->
+    <?php if (Session::hasRole('admin') || Session::hasRole('teacher') || Session::hasRole('registrar')): ?>
     <div class="nav-section">
         <div class="nav-section-label">Reports</div>
         <a href="<?= APP_URL ?>/violations/create" class="nav-item-custom <?= (strpos($_SERVER['REQUEST_URI'], '/violations/create') !== false) ? 'active' : '' ?>">

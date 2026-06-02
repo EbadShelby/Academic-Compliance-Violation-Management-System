@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS `roles` (
 INSERT IGNORE INTO `roles` (`id`, `name`, `slug`, `description`) VALUES
 (1, 'Administrator', 'admin',   'Full access to all features and settings'),
 (2, 'Teacher',       'teacher', 'Can file and manage violation reports'),
-(3, 'Student',       'student', 'Can view their own violation records only');
+(3, 'Student',       'student', 'Can view their own violation records only'),
+(4, 'Registrar',     'registrar', 'Manages and processes academic violations');
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 2. USERS
@@ -60,6 +61,12 @@ VALUES (
     1, 1, 'System', 'Administrator', 'admin@acvms.edu',
     '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
     -- ↑ Hash of "Admin@1234" — replace with your own
+    1
+),
+(
+    2, 4, 'System', 'Registrar', 'registrar@acvms.edu',
+    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    -- ↑ Hash of "Registrar@1234" (reusing the same hash for testing)
     1
 );
 
