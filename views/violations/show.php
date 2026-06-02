@@ -64,7 +64,7 @@ function formatBytes(int $bytes): string {
     border-bottom: 1px solid var(--border-subtle);
     font-size: .9375rem;
     font-weight: 700;
-    background: rgba(255,255,255,.025);
+    background: var(--glass-bg-25);
 }
 .detail-card-header i { color: var(--brand-primary); }
 .detail-card-body { padding: 1.25rem; }
@@ -110,7 +110,7 @@ function formatBytes(int $bytes): string {
 
 /* Description block */
 .description-block {
-    background: rgba(255,255,255,.03);
+    background: var(--glass-bg-3);
     border: 1px solid var(--border-subtle);
     border-radius: .75rem;
     padding: 1rem 1.25rem;
@@ -129,11 +129,11 @@ function formatBytes(int $bytes): string {
     padding: .75rem 1rem;
     border: 1px solid var(--border-subtle);
     border-radius: .75rem;
-    background: rgba(255,255,255,.03);
+    background: var(--glass-bg-3);
     margin-bottom: .625rem;
     transition: background .12s;
 }
-.evidence-item:hover { background: rgba(255,255,255,.06); }
+.evidence-item:hover { background: var(--glass-bg-6); }
 .evidence-item:last-child { margin-bottom: 0; }
 .evidence-icon { font-size: 1.75rem; flex-shrink: 0; }
 .evidence-info { flex: 1; min-width: 0; }
@@ -146,7 +146,7 @@ function formatBytes(int $bytes): string {
     align-items: center;
     gap: .4rem;
     padding: .5rem 1rem;
-    background: rgba(255,255,255,.06);
+    background: var(--glass-bg-6);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
     color: var(--text-muted);
@@ -154,7 +154,7 @@ function formatBytes(int $bytes): string {
     text-decoration: none;
     transition: background .15s, color .15s;
 }
-.btn-back:hover { background: rgba(255,255,255,.1); color: var(--text-primary); }
+.btn-back:hover { background: var(--glass-bg-10); color: var(--text-primary); }
 </style>
 
 <!-- ── Page header ──────────────────────────────────────────────────────── -->
@@ -412,7 +412,7 @@ function formatBytes(int $bytes): string {
                     <div class="d-flex flex-column gap-3">
                         <?php foreach ($actions as $act): ?>
                             <?php if ($act['action_type'] === 'student_appeal'): ?>
-                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle);">
+                            <div class="p-3 rounded" style="background: var(--glass-bg-3); border: 1px solid var(--border-subtle);">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="badge" style="background: rgba(99,102,241,.2); color: #a5b4fc; font-weight: 600;">Appeal / Defense</span>
                                     <small class="text-muted"><?= date('M d, Y H:i', strtotime($act['created_at'])) ?></small>
@@ -486,7 +486,7 @@ function formatBytes(int $bytes): string {
     width: 30px; height: 30px;
     border-radius: .4rem;
     border: 1px solid var(--border-subtle);
-    background: rgba(255,255,255,.05);
+    background: var(--glass-bg-5);
     color: var(--text-muted);
     font-size: .9rem;
     text-decoration: none;
@@ -548,7 +548,7 @@ function formatBytes(int $bytes): string {
     align-items: center;
     gap: .5rem;
     padding: .375rem .625rem;
-    background: rgba(255,255,255,.04);
+    background: var(--glass-bg-4);
     border: 1px solid var(--border-subtle);
     border-radius: .5rem;
     font-size: .8rem;

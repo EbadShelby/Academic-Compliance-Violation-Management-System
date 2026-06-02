@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Teacher Dashboard View — Phase 13
  */
@@ -11,18 +12,19 @@ $resolved    = (int)($stats['resolved']      ?? 0);
 $rejected    = (int)($stats['rejected']      ?? 0);
 $closed      = (int)($stats['closed']        ?? 0);
 
-function _teacher_rel(string $ts): string {
+function _teacher_rel(string $ts): string
+{
     $d = time() - strtotime($ts);
     if ($d < 60)    return 'Just now';
-    if ($d < 3600)  return floor($d/60).'m ago';
-    if ($d < 86400) return floor($d/3600).'h ago';
+    if ($d < 3600)  return floor($d / 60) . 'm ago';
+    if ($d < 86400) return floor($d / 3600) . 'h ago';
     return date('M j', strtotime($ts));
 }
 
 // Category chart data
 $_catLabels = [];
 $_catData   = [];
-$_catBg     = ['#818cf8','#34d399','#fbbf24','#f87171','#f97316','#06b6d4','#a78bfa','#94a3b8'];
+$_catBg     = ['#818cf8', '#34d399', '#fbbf24', '#f87171', '#f97316', '#06b6d4', '#a78bfa', '#94a3b8'];
 foreach (($categoryDist ?? []) as $row) {
     $_catLabels[] = $row['category'];
     $_catData[]   = (int) $row['total'];
@@ -121,11 +123,13 @@ foreach (($categoryDist ?? []) as $row) {
         <div class="chart-card h-100">
             <div class="chart-card-title"><i class="bi bi-pie-chart-fill me-2"></i>My Reports by Category</div>
             <?php if (empty($_catData)): ?>
-            <div class="dash-empty"><i class="bi bi-bar-chart"></i><p>No data yet.</p></div>
+                <div class="dash-empty"><i class="bi bi-bar-chart"></i>
+                    <p>No data yet.</p>
+                </div>
             <?php else: ?>
-            <div style="position:relative;height:220px;">
-                <canvas id="chartCatTeacher"></canvas>
-            </div>
+                <div style="position:relative;height:220px;">
+                    <canvas id="chartCatTeacher"></canvas>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -138,34 +142,36 @@ foreach (($categoryDist ?? []) as $row) {
                 <a href="<?= APP_URL ?>/violations" class="dash-table-link" id="linkTeacherAllReports">View all <i class="bi bi-arrow-right"></i></a>
             </div>
             <?php if (empty($recentViolations)): ?>
-            <div class="dash-empty"><i class="bi bi-inbox"></i><p>You haven't filed any reports yet.</p></div>
+                <div class="dash-empty"><i class="bi bi-inbox"></i>
+                    <p>You haven't filed any reports yet.</p>
+                </div>
             <?php else: ?>
-            <div class="table-responsive">
-                <table class="dash-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Student</th>
-                            <th>Type</th>
-                            <th>Severity</th>
-                            <th>Status</th>
-                            <th>Filed</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($recentViolations as $v): ?>
-                        <tr onclick="location.href='<?= APP_URL ?>/violations/<?= $v['id'] ?>'" style="cursor:pointer;">
-                            <td><code>#<?= $v['id'] ?></code></td>
-                            <td><?= htmlspecialchars($v['student_name']) ?></td>
-                            <td><?= htmlspecialchars($v['type']) ?></td>
-                            <td><span class="sev-badge sev-<?= $v['severity'] ?>"><?= ucfirst($v['severity']) ?></span></td>
-                            <td><span class="status-badge status-<?= $v['status'] ?>"><?= ucfirst(str_replace('_',' ',$v['status'])) ?></span></td>
-                            <td class="text-muted-sm"><?= _teacher_rel($v['created_at']) ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+                <div class="table-responsive">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student</th>
+                                <th>Type</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                                <th>Filed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($recentViolations as $v): ?>
+                                <tr onclick="location.href='<?= APP_URL ?>/violations/<?= $v['id'] ?>'" style="cursor:pointer;">
+                                    <td><code>#<?= $v['id'] ?></code></td>
+                                    <td><?= htmlspecialchars($v['student_name']) ?></td>
+                                    <td><?= htmlspecialchars($v['type']) ?></td>
+                                    <td><span class="sev-badge sev-<?= $v['severity'] ?>"><?= ucfirst($v['severity']) ?></span></td>
+                                    <td><span class="status-badge status-<?= $v['status'] ?>"><?= ucfirst(str_replace('_', ' ', $v['status'])) ?></span></td>
+                                    <td class="text-muted-sm"><?= _teacher_rel($v['created_at']) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -179,20 +185,61 @@ foreach (($categoryDist ?? []) as $row) {
 <?php include __DIR__ . '/_dashboard_styles.php'; ?>
 
 <?php if (!empty($_catData)): ?>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script>
-Chart.defaults.color = '#94a3b8';
-Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
-new Chart(document.getElementById('chartCatTeacher'), {
-    type: 'doughnut',
-    data: {
-        labels: <?= json_encode($_catLabels) ?>,
-        datasets: [{ data: <?= json_encode($_catData) ?>, backgroundColor: <?= json_encode(array_slice($_catBg, 0, count($_catLabels))) ?>, borderWidth: 2, borderColor: '#0f172a' }]
-    },
-    options: {
-        responsive: true, maintainAspectRatio: false, cutout: '60%',
-        plugins: { legend: { position: 'bottom', labels: { padding: 10, font: { size: 11 } } } }
-    }
-});
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+        const rootStyles = getComputedStyle(document.documentElement);
+
+        function getChartColors() {
+            return {
+                text: rootStyles.getPropertyValue('--text-muted').trim() || '#94a3b8',
+                border: rootStyles.getPropertyValue('--border-subtle').trim() || 'rgba(255,255,255,0.06)',
+                bg: rootStyles.getPropertyValue('--chart-border').trim() || '#0f172a'
+            };
+        }
+
+        let cColors = getChartColors();
+        Chart.defaults.color = cColors.text;
+        Chart.defaults.borderColor = cColors.border;
+
+        window.addEventListener('themechanged', () => {
+            cColors = getChartColors();
+            Chart.defaults.color = cColors.text;
+            Chart.defaults.borderColor = cColors.border;
+            for (let id in Chart.instances) {
+                let chart = Chart.instances[id];
+                if (chart.config.type === 'doughnut') {
+                    chart.data.datasets.forEach(ds => ds.borderColor = cColors.bg);
+                }
+                chart.update();
+            }
+        });
+        new Chart(document.getElementById('chartCatTeacher'), {
+            type: 'doughnut',
+            data: {
+                labels: <?= json_encode($_catLabels) ?>,
+                datasets: [{
+                    data: <?= json_encode($_catData) ?>,
+                    backgroundColor: <?= json_encode(array_slice($_catBg, 0, count($_catLabels))) ?>,
+                    borderWidth: 2,
+                    borderColor: cColors.bg
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 10,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 <?php endif; ?>

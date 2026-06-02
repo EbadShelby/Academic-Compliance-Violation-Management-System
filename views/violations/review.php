@@ -58,7 +58,7 @@ $actionIcons = [
     border-bottom: 1px solid var(--border-subtle);
     font-size: .9375rem;
     font-weight: 700;
-    background: rgba(255,255,255,.025);
+    background: var(--glass-bg-25);
 }
 .review-card-header i { color: var(--brand-primary); }
 .review-card-body { padding: 1.25rem; }
@@ -102,7 +102,7 @@ $actionIcons = [
 
 /* Description */
 .desc-block {
-    background: rgba(255,255,255,.03);
+    background: var(--glass-bg-3);
     border: 1px solid var(--border-subtle);
     border-radius: .75rem;
     padding: 1rem 1.25rem;
@@ -134,7 +134,7 @@ $actionIcons = [
 .wf-resolve { background:rgba(52,211,153,.12); color:#34d399; border-color:rgba(52,211,153,.3); }
 .wf-close   { background:rgba(148,163,184,.1); color:#94a3b8; border-color:rgba(148,163,184,.25); }
 .wf-reject  { background:rgba(248,113,113,.1); color:#f87171; border-color:rgba(248,113,113,.3); }
-.wf-disabled{ background:rgba(255,255,255,.03); color:var(--text-muted); border-color:var(--border-subtle); cursor:not-allowed; opacity:.5; }
+.wf-disabled{ background:var(--glass-bg-3); color:var(--text-muted); border-color:var(--border-subtle); cursor:not-allowed; opacity:.5; }
 
 /* Sanction box */
 .sanction-existing {
@@ -170,11 +170,11 @@ $actionIcons = [
     padding: .625rem .875rem;
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
-    background: rgba(255,255,255,.02);
+    background: var(--glass-bg-2);
     margin-bottom: .5rem;
     transition: background .12s;
 }
-.ev-item:hover { background: rgba(255,255,255,.05); }
+.ev-item:hover { background: var(--glass-bg-5); }
 .ev-item:last-child { margin-bottom: 0; }
 .ev-icon { font-size: 1.5rem; flex-shrink: 0; }
 .ev-info { flex: 1; min-width: 0; }
@@ -187,7 +187,7 @@ $actionIcons = [
     width: 28px; height: 28px;
     border-radius: .4rem;
     border: 1px solid var(--border-subtle);
-    background: rgba(255,255,255,.04);
+    background: var(--glass-bg-4);
     color: var(--text-muted);
     font-size: .85rem;
     text-decoration: none;
@@ -239,7 +239,7 @@ $actionIcons = [
     align-items: center;
     gap: .4rem;
     padding: .5rem 1rem;
-    background: rgba(255,255,255,.06);
+    background: var(--glass-bg-6);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
     color: var(--text-muted);
@@ -247,7 +247,7 @@ $actionIcons = [
     text-decoration: none;
     transition: background .15s, color .15s;
 }
-.btn-back:hover { background: rgba(255,255,255,.1); color: var(--text-primary); }
+.btn-back:hover { background: var(--glass-bg-10); color: var(--text-primary); }
 
 /* Closed notice */
 .closed-banner {
@@ -266,7 +266,7 @@ $actionIcons = [
 /* Form controls */
 .rev-textarea {
     width: 100%;
-    background: rgba(255,255,255,.05);
+    background: var(--glass-bg-5);
     border: 1px solid var(--border-subtle);
     border-radius: .5rem;
     color: var(--text-primary);
@@ -315,7 +315,7 @@ $actionIcons = [
 .ai-summary-btn:disabled { opacity:.6; cursor:not-allowed; }
 .ai-summary-result {
     margin-top: .875rem;
-    background: rgba(255,255,255,.03);
+    background: var(--glass-bg-3);
     border: 1px solid rgba(139,92,246,.2);
     border-radius: .625rem;
     padding: .875rem 1rem;

@@ -106,7 +106,7 @@
     text-decoration: none; background: none;
     transition: background .15s, color .15s;
 }
-.btn-back:hover { background: rgba(255,255,255,.05); color: var(--text-primary); }
+.btn-back:hover { background: var(--glass-bg-5); color: var(--text-primary); }
 </style>
 
 <!-- Breadcrumb -->

@@ -377,7 +377,7 @@
     font-size: .9375rem;
     font-weight: 700;
     color: var(--text-primary);
-    background: rgba(255,255,255,.025);
+    background: var(--glass-bg-25);
 }
 .form-card-header i { color: var(--brand-primary); font-size: 1.0625rem; }
 .form-card-body { padding: 1.25rem; }
@@ -396,7 +396,7 @@
 .form-select-custom {
     width: 100%;
     padding: .625rem .875rem;
-    background: rgba(255,255,255,.05);
+    background: var(--glass-bg-5);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
     color: var(--text-primary);
@@ -414,7 +414,7 @@
 .form-select-custom.is-invalid {
     border-color: #f87171;
 }
-.form-select-custom option { background: #1e293b; color: var(--text-primary); }
+.form-select-custom option { background: var(--surface-card); color: var(--text-primary); }
 textarea.form-control-custom { resize: vertical; min-height: 120px; line-height: 1.6; }
 
 .field-error { font-size: .8rem; color: #f87171; margin-top: .25rem; }
@@ -483,7 +483,7 @@ textarea.form-control-custom { resize: vertical; min-height: 120px; line-height:
     align-items: center;
     gap: .75rem;
     padding: .625rem .875rem;
-    background: rgba(255,255,255,.04);
+    background: var(--glass-bg-4);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
     font-size: .875rem;
@@ -508,7 +508,7 @@ textarea.form-control-custom { resize: vertical; min-height: 120px; line-height:
     align-items: center;
     gap: .5rem;
     padding: .5rem .875rem;
-    background: rgba(255,255,255,.04);
+    background: var(--glass-bg-4);
     border-radius: .5rem;
     font-size: .8125rem;
 }
@@ -781,7 +781,7 @@ textarea.form-control-custom { resize: vertical; min-height: 120px; line-height:
     align-items: center;
     gap: .4rem;
     padding: .5rem 1rem;
-    background: rgba(255,255,255,.06);
+    background: var(--glass-bg-6);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
     color: var(--text-muted);
@@ -790,7 +790,7 @@ textarea.form-control-custom { resize: vertical; min-height: 120px; line-height:
     text-decoration: none;
     transition: background .15s, color .15s;
 }
-.btn-secondary-custom:hover { background: rgba(255,255,255,.1); color: var(--text-primary); }
+.btn-secondary-custom:hover { background: var(--glass-bg-10); color: var(--text-primary); }
 
 /* Guidelines */
 .guidelines-list {

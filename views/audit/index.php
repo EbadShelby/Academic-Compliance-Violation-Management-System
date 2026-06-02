@@ -67,51 +67,52 @@ $fDateTo   = htmlspecialchars($filters['date_to']   ?? '');
 <style>
 /* ── Audit log page styles ──────────────────────────────────────────────────── */
 .audit-card {
-    background: #1e293b;
-    border: 1px solid rgba(255,255,255,.07);
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: .875rem;
     overflow: hidden;
 }
 .audit-filter-bar {
-    background: rgba(255,255,255,.03);
-    border-bottom: 1px solid rgba(255,255,255,.07);
+    background: var(--glass-bg-3);
+    border-bottom: 1px solid var(--border-subtle);
     padding: 1.25rem 1.5rem;
 }
 .audit-filter-bar .form-control,
 .audit-filter-bar .form-select {
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.1);
-    color: #f8fafc;
+    background: var(--glass-bg-5);
+    border: 1px solid var(--glass-border-10);
+    color: var(--text-primary);
     font-size: .825rem;
 }
 .audit-filter-bar .form-control::placeholder { color: #64748b; }
 .audit-filter-bar .form-control:focus,
 .audit-filter-bar .form-select:focus {
-    background: rgba(255,255,255,.08);
+    background: var(--glass-bg-10);
     border-color: #4f46e5;
     box-shadow: 0 0 0 3px rgba(79,70,229,.2);
-    color: #f8fafc;
+    color: var(--text-primary);
 }
-.audit-filter-bar .form-select option { background: #1e293b; color: #f8fafc; }
+.audit-filter-bar .form-select option { background: var(--surface-card); color: var(--text-primary); }
 .audit-table thead th {
-    background: rgba(255,255,255,.04);
-    color: #94a3b8;
+    background: var(--glass-bg-4);
+    color: var(--text-muted);
     font-size: .7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .08em;
-    border-bottom: 1px solid rgba(255,255,255,.07);
+    border-bottom: 1px solid var(--border-subtle);
     padding: .875rem 1rem;
     white-space: nowrap;
 }
 .audit-table tbody tr {
-    border-bottom: 1px solid rgba(255,255,255,.05);
+    border-bottom: 1px solid var(--border-subtle);
     transition: background .15s;
 }
-.audit-table tbody tr:hover { background: rgba(255,255,255,.03); }
-.audit-table td { padding: .75rem 1rem; vertical-align: middle; font-size: .825rem; color: #cbd5e1; }
+.audit-table tbody tr:hover { background: var(--glass-bg-3); }
+.audit-table { --bs-table-bg: transparent; --bs-table-color: var(--text-color); }
+.audit-table td { padding: .75rem 1rem; vertical-align: middle; font-size: .825rem; color: var(--text-color); }
 .audit-table td.col-action { min-width: 180px; }
-.audit-table td.col-detail { max-width: 260px; font-size: .75rem; color: #64748b; }
+.audit-table td.col-detail { max-width: 260px; font-size: .75rem; color: var(--text-muted); }
 
 .action-badge {
     display: inline-flex;
@@ -123,27 +124,27 @@ $fDateTo   = htmlspecialchars($filters['date_to']   ?? '');
     padding: .3rem .6rem;
     border-radius: 999px;
 }
-.actor-name { font-weight: 600; color: #e2e8f0; font-size: .825rem; }
-.actor-email { font-size: .7rem; color: #64748b; }
-.ip-text { font-family: monospace; font-size: .75rem; color: #94a3b8; }
-.ts-text  { font-size: .75rem; color: #64748b; white-space: nowrap; }
+.actor-name { font-weight: 600; color: var(--text-color); font-size: .825rem; }
+.actor-email { font-size: .7rem; color: var(--text-muted); }
+.ip-text { font-family: monospace; font-size: .75rem; color: var(--text-muted); }
+.ts-text  { font-size: .75rem; color: var(--text-muted); white-space: nowrap; }
 
 .detail-pill {
     display: inline-block;
-    background: rgba(255,255,255,.06);
+    background: var(--glass-bg-10);
     border-radius: .375rem;
     padding: .2rem .45rem;
     font-family: monospace;
     font-size: .7rem;
-    color: #94a3b8;
+    color: var(--text-color);
     word-break: break-all;
     max-width: 100%;
 }
 
 /* Pagination */
 .audit-pagination .page-link {
-    background: rgba(255,255,255,.04);
-    border-color: rgba(255,255,255,.1);
+    background: var(--glass-bg-4);
+    border-color: var(--glass-border-10);
     color: #94a3b8;
     font-size: .8rem;
 }
@@ -204,7 +205,7 @@ $fDateTo   = htmlspecialchars($filters['date_to']   ?? '');
                     Search
                 </label>
                 <div class="input-group input-group-sm">
-                    <span class="input-group-text" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:#64748b;">
+                    <span class="input-group-text" style="background:var(--glass-bg-5);border-color:var(--glass-border-10);color:var(--text-muted);">
                         <i class="bi bi-search"></i>
                     </span>
                     <input type="text"
@@ -294,7 +295,7 @@ $fDateTo   = htmlspecialchars($filters['date_to']   ?? '');
     <?php if (empty($logs)): ?>
         <div class="empty-state">
             <i class="bi bi-journal-x"></i>
-            <div class="fw-semibold" style="color:#94a3b8;font-size:.9rem;">No log entries found</div>
+            <div class="fw-semibold" style="color:var(--text-muted);font-size:.9rem;">No log entries found</div>
             <div class="mt-1" style="font-size:.8rem;">
                 <?php if (!empty(array_filter($filters))): ?>
                     Try adjusting or <a href="<?= APP_URL ?>/admin/audit-logs" class="text-primary">clearing</a> the filters.
@@ -359,7 +360,7 @@ $fDateTo   = htmlspecialchars($filters['date_to']   ?? '');
                     <!-- Target -->
                     <td>
                         <?php if ($log['target_type'] && $log['target_id']): ?>
-                            <span style="font-size:.75rem;color:#94a3b8;">
+                            <span style="font-size:.75rem;color:var(--text-muted);">
                                 <?= htmlspecialchars($log['target_type']) ?>
                                 <span class="text-primary">#<?= (int) $log['target_id'] ?></span>
                             </span>
@@ -392,7 +393,7 @@ $fDateTo   = htmlspecialchars($filters['date_to']   ?? '');
                     <td>
                         <span class="ts-text" title="<?= htmlspecialchars($log['created_at']) ?>">
                             <?= date('d M Y', strtotime($log['created_at'])) ?><br>
-                            <span style="color:#475569;"><?= date('H:i:s', strtotime($log['created_at'])) ?></span>
+                            <span style="color:var(--text-muted);"><?= date('H:i:s', strtotime($log['created_at'])) ?></span>
                         </span>
                     </td>
                 </tr>
@@ -404,8 +405,8 @@ $fDateTo   = htmlspecialchars($filters['date_to']   ?? '');
     <!-- ── Pagination ─────────────────────────────────────────────────────── -->
     <?php if ($pages > 1): ?>
     <div class="d-flex align-items-center justify-content-between px-4 py-3"
-         style="border-top:1px solid rgba(255,255,255,.06);">
-        <div style="font-size:.775rem;color:#64748b;">
+         style="border-top:1px solid var(--border-subtle);">
+        <div style="font-size:.775rem;color:var(--text-muted);">
             Page <?= $page ?> of <?= $pages ?> &mdash; <?= number_format($total) ?> entries
         </div>
         <nav aria-label="Audit log pagination">

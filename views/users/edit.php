@@ -34,7 +34,7 @@
 .field-input {
     width: 100%;
     padding: .625rem .875rem;
-    background: rgba(255,255,255,.05);
+    background: var(--glass-bg-5);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
     color: var(--text-primary);
@@ -48,7 +48,7 @@
 }
 .field-input.is-invalid { border-color: rgba(248,113,113,.6); }
 .field-input::placeholder { color: rgba(148,163,184,.5); }
-select.field-input option { background: #1e293b; }
+select.field-input option { background: var(--surface-card); }
 .field-error { font-size: .8125rem; color: #f87171; margin-top: .3rem; }
 .field-hint  { font-size: .75rem; color: var(--text-muted); margin-top: .3rem; }
 
@@ -75,7 +75,7 @@ select.field-input option { background: #1e293b; }
     cursor: pointer; text-decoration: none;
     transition: background .15s, border-color .15s, color .15s;
 }
-.btn-cancel:hover { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.2); color: var(--text-primary); }
+.btn-cancel:hover { background: var(--glass-bg-5); border-color: var(--glass-border-20); color: var(--text-primary); }
 
 .pw-toggle-wrap { position: relative; }
 .pw-toggle-wrap .field-input { padding-right: 2.75rem; }
@@ -90,7 +90,7 @@ select.field-input option { background: #1e293b; }
 .toggle-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: .875rem 1rem;
-    background: rgba(255,255,255,.03);
+    background: var(--glass-bg-3);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
 }

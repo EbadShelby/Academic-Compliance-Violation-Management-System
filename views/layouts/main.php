@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= function_exists('csrf_token') ? htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') : '' ?>">
+    <script>
+        const storedTheme = localStorage.getItem('acvms_theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (storedTheme === 'light' || (!storedTheme && !systemPrefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
     <title><?= htmlspecialchars($title ?? APP_NAME) ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -15,6 +22,8 @@
             --brand-primary:   #4f46e5;
             --brand-secondary: #7c3aed;
             --brand-accent:    #06b6d4;
+            
+            /* Dark Theme Colors (Default) */
             --surface-dark:    #0f172a;
             --surface-nav:     #111827;
             --surface-card:    #1e293b;
@@ -23,6 +32,74 @@
             --text-primary:    #f8fafc;
             --text-muted:      #94a3b8;
             --text-nav:        #cbd5e1;
+            
+            /* Glassmorphism Variables for Dark Mode */
+            --glass-bg-2:      rgba(255, 255, 255, 0.02);
+            --glass-bg-25:     rgba(255, 255, 255, 0.025);
+            --glass-bg-3:      rgba(255, 255, 255, 0.03);
+            --glass-bg-4:      rgba(255, 255, 255, 0.04);
+            --glass-bg-5:      rgba(255, 255, 255, 0.05);
+            --glass-bg-6:      rgba(255, 255, 255, 0.06);
+            --glass-bg-8:      rgba(255, 255, 255, 0.08);
+            --glass-bg-10:     rgba(255, 255, 255, 0.1);
+            --glass-bg-12:     rgba(255, 255, 255, 0.12);
+            --glass-bg-15:     rgba(255, 255, 255, 0.15);
+            --glass-bg-20:     rgba(255, 255, 255, 0.2);
+            
+            --glass-border-10: rgba(255, 255, 255, 0.1);
+            --glass-border-12: rgba(255, 255, 255, 0.12);
+            --glass-border-18: rgba(255, 255, 255, 0.18);
+            --glass-border-20: rgba(255, 255, 255, 0.2);
+            
+            --glass-text-20:   rgba(255, 255, 255, 0.2);
+            --glass-text-40:   rgba(255, 255, 255, 0.4);
+            
+            --topbar-bg:       rgba(15, 23, 42, 0.85);
+            --nav-active-bg:   linear-gradient(90deg, rgba(79,70,229,.25), rgba(79,70,229,.08));
+            --nav-active-text: #a5b4fc;
+            --bell-hover-text: #a5b4fc;
+            --bell-hover-border: rgba(165,180,252,.25);
+            --chart-border:    #0f172a;
+        }
+
+        :root[data-theme="light"] {
+            /* Light Theme Colors */
+            --surface-dark:    #f8fafc;
+            --surface-nav:     #ffffff;
+            --surface-card:    #ffffff;
+            --surface-hover:   rgba(79,70,229,.08);
+            --border-subtle:   rgba(0, 0, 0, 0.08);
+            --text-primary:    #0f172a;
+            --text-muted:      #64748b;
+            --text-nav:        #475569;
+            
+            /* Glassmorphism Variables for Light Mode */
+            --glass-bg-2:      rgba(0, 0, 0, 0.02);
+            --glass-bg-25:     rgba(0, 0, 0, 0.025);
+            --glass-bg-3:      rgba(0, 0, 0, 0.03);
+            --glass-bg-4:      rgba(0, 0, 0, 0.04);
+            --glass-bg-5:      rgba(0, 0, 0, 0.05);
+            --glass-bg-6:      rgba(0, 0, 0, 0.06);
+            --glass-bg-8:      rgba(0, 0, 0, 0.08);
+            --glass-bg-10:     rgba(0, 0, 0, 0.1);
+            --glass-bg-12:     rgba(0, 0, 0, 0.12);
+            --glass-bg-15:     rgba(0, 0, 0, 0.15);
+            --glass-bg-20:     rgba(0, 0, 0, 0.2);
+            
+            --glass-border-10: rgba(0, 0, 0, 0.1);
+            --glass-border-12: rgba(0, 0, 0, 0.12);
+            --glass-border-18: rgba(0, 0, 0, 0.18);
+            --glass-border-20: rgba(0, 0, 0, 0.2);
+            
+            --glass-text-20:   rgba(0, 0, 0, 0.2);
+            --glass-text-40:   rgba(0, 0, 0, 0.4);
+            
+            --topbar-bg:       rgba(255, 255, 255, 0.85);
+            --nav-active-bg:   linear-gradient(90deg, rgba(79,70,229,.1), rgba(79,70,229,.03));
+            --nav-active-text: var(--brand-primary);
+            --bell-hover-text: var(--brand-primary);
+            --bell-hover-border: rgba(79,70,229,.25);
+            --chart-border:    #f8fafc;
         }
 
         .text-muted { color: var(--text-muted) !important; }
@@ -100,8 +177,8 @@
             color: var(--text-primary);
         }
         .nav-item-custom.active {
-            background: linear-gradient(90deg, rgba(79,70,229,.25), rgba(79,70,229,.08));
-            color: #a5b4fc;
+            background: var(--nav-active-bg);
+            color: var(--nav-active-text);
             border-left: 2px solid var(--brand-primary);
             padding-left: calc(.875rem - 2px);
         }
@@ -120,13 +197,13 @@
             gap: .75rem;
             padding: .75rem;
             border-radius: .75rem;
-            background: rgba(255,255,255,.04);
+            background: var(--glass-bg-4);
             text-decoration: none;
             color: var(--text-primary);
             transition: background .15s;
         }
         .user-card:hover {
-            background: rgba(255,255,255,.08);
+            background: var(--glass-bg-8);
         }
         .user-avatar {
             width: 36px; height: 36px;
@@ -176,7 +253,7 @@
             position: sticky;
             top: 0;
             height: var(--topbar-height);
-            background: rgba(15,23,42,.85);
+            background: var(--topbar-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-subtle);
@@ -210,7 +287,7 @@
             font-size: 1.1rem;
             transition: background .15s, color .15s;
         }
-        .sidebar-toggle:hover { background: rgba(255,255,255,.06); color: var(--text-primary); }
+        .sidebar-toggle:hover { background: var(--glass-bg-6); color: var(--text-primary); }
 
         /* ── Page content ──────────────────────────────────────────────────── */
         #pageContent { flex: 1; padding: 1.75rem; }
@@ -247,9 +324,9 @@
             transition: background .15s, color .15s, border-color .15s;
         }
         .notif-bell-btn:hover {
-            background: rgba(255,255,255,.06);
-            border-color: rgba(165,180,252,.25);
-            color: #a5b4fc;
+            background: var(--glass-bg-6);
+            border-color: var(--bell-hover-border);
+            color: var(--bell-hover-text);
         }
         .notif-badge {
             position: absolute;
@@ -393,6 +470,9 @@
             <h1 class="page-title"><?= htmlspecialchars($pageTitle ?? APP_NAME) ?></h1>
         </div>
         <div class="topbar-right">
+            <button class="notif-bell-btn" id="themeToggleBtn" aria-label="Toggle Theme" title="Toggle Theme">
+                <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+            </button>
             <?php $authUser = $authUser ?? Session::user(); ?>
             <?php if ($authUser): ?>
             <?php
@@ -500,6 +580,34 @@
             if (!confirm('Are you sure you want to sign out?')) {
                 e.preventDefault();
             }
+        });
+    }
+
+    // ── Theme Toggler ─────────────────────────────────────────────────────────
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const rootEl = document.documentElement;
+
+    function updateThemeIcon() {
+        if (!themeIcon) return;
+        if (rootEl.getAttribute('data-theme') === 'light') {
+            themeIcon.className = 'bi bi-sun-fill';
+        } else {
+            themeIcon.className = 'bi bi-moon-stars-fill';
+        }
+    }
+
+    if (themeToggleBtn) {
+        updateThemeIcon();
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = rootEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            rootEl.setAttribute('data-theme', newTheme);
+            localStorage.setItem('acvms_theme', newTheme);
+            updateThemeIcon();
+            
+            // Dispatch a custom event so charts can update their colors
+            window.dispatchEvent(new Event('themechanged'));
         });
     }
 </script>

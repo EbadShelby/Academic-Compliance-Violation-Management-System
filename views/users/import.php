@@ -35,7 +35,7 @@
 .field-input {
     width: 100%;
     padding: .625rem .875rem;
-    background: rgba(255,255,255,.05);
+    background: var(--glass-bg-5);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
     color: var(--text-primary);
@@ -48,7 +48,7 @@
     box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
 .field-input::file-selector-button {
-    background: rgba(255,255,255,.1);
+    background: var(--glass-bg-10);
     border: 1px solid var(--border-subtle);
     border-radius: .4rem;
     color: var(--text-primary);
@@ -57,7 +57,7 @@
     cursor: pointer;
     transition: background .15s;
 }
-.field-input::file-selector-button:hover { background: rgba(255,255,255,.2); }
+.field-input::file-selector-button:hover { background: var(--glass-bg-20); }
 
 .field-hint  { font-size: .75rem; color: var(--text-muted); margin-top: .5rem; }
 
@@ -84,7 +84,7 @@
     cursor: pointer; text-decoration: none;
     transition: background .15s, border-color .15s, color .15s;
 }
-.btn-cancel:hover { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.2); color: var(--text-primary); }
+.btn-cancel:hover { background: var(--glass-bg-5); border-color: var(--glass-border-20); color: var(--text-primary); }
 
 .instructions-box {
     background: rgba(16,185,129,.05);
@@ -103,7 +103,7 @@
 .instructions-box ul { margin-bottom: 0; padding-left: 1.25rem; color: var(--text-primary); font-size: .875rem; }
 .instructions-box ul li { margin-bottom: .4rem; }
 .instructions-box ul li code {
-    background: rgba(0,0,0,.2); padding: .1rem .3rem; border-radius: .25rem; color: #6ee7b7;
+    background: var(--glass-bg-10); padding: .1rem .3rem; border-radius: .25rem; color: var(--text-color); font-weight: 600;
 }
 
 .error-list {

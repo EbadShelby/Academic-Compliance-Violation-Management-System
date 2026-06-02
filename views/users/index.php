@@ -53,7 +53,7 @@
 .search-box input {
     width: 100%;
     padding: .5rem .875rem .5rem 2.25rem;
-    background: rgba(255,255,255,.05);
+    background: var(--glass-bg-5);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
     color: var(--text-primary);
@@ -83,7 +83,7 @@ table.users-tbl tbody tr {
     transition: background .15s;
 }
 table.users-tbl tbody tr:last-child { border-bottom: none; }
-table.users-tbl tbody tr:hover { background: rgba(255,255,255,.025); }
+table.users-tbl tbody tr:hover { background: var(--glass-bg-25); }
 table.users-tbl tbody td { padding: .875rem 1rem; font-size: .875rem; vertical-align: middle; }
 
 .avatar-sm {
@@ -133,8 +133,8 @@ table.users-tbl tbody td { padding: .875rem 1rem; font-size: .875rem; vertical-a
 
 /* Pagination */
 .app-pagination .page-link {
-    background: rgba(255,255,255,.04);
-    border-color: rgba(255,255,255,.1);
+    background: var(--glass-bg-4);
+    border-color: var(--border-subtle);
     color: var(--text-muted);
     font-size: .8rem;
 }
@@ -248,7 +248,7 @@ foreach ($users as $u) {
                             <?= htmlspecialchars($u['role_name'] ?? $u['role'] ?? '—') ?>
                         </span>
                     </td>
-                    <td style="color:var(--text-muted);"><?= $u['student_id'] ? htmlspecialchars($u['student_id']) : '<span style="color:rgba(255,255,255,.2);">—</span>' ?></td>
+                    <td style="color:var(--text-muted);"><?= $u['student_id'] ? htmlspecialchars($u['student_id']) : '<span style="color:var(--text-muted);">—</span>' ?></td>
                     <td>
                         <?php if ((int)$u['is_active'] === 1): ?>
                         <span class="status-badge active"><i class="bi bi-circle-fill" style="font-size:.45rem;"></i> Active</span>

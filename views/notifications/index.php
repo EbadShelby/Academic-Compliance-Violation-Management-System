@@ -60,8 +60,8 @@ $authUser = Session::user();
     }
 
     .notif-card {
-        background: #1e293b;
-        border: 1px solid rgba(255,255,255,.08);
+        background: var(--surface-card);
+        border: 1px solid var(--border-subtle);
         border-radius: .875rem;
         padding: 1.125rem 1.25rem;
         display: flex;
@@ -89,12 +89,12 @@ $authUser = Session::user();
     .notif-body-title {
         font-size: .9375rem;
         font-weight: 600;
-        color: #f8fafc;
+        color: var(--text-color);
         margin-bottom: .2rem;
     }
     .notif-body-msg {
         font-size: .875rem;
-        color: #94a3b8;
+        color: var(--text-muted);
         line-height: 1.5;
     }
     .notif-meta {
@@ -104,7 +104,7 @@ $authUser = Session::user();
         margin-top: .5rem;
         flex-wrap: wrap;
     }
-    .notif-time { font-size: .8125rem; color: #64748b; }
+    .notif-time { font-size: .8125rem; color: var(--text-muted); }
     .notif-unread-dot {
         width: 8px; height: 8px;
         border-radius: 50%;
@@ -115,9 +115,9 @@ $authUser = Session::user();
     .notif-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
     .btn-mark-read {
         background: none;
-        border: 1px solid rgba(255,255,255,.12);
+        border: 1px solid var(--border-subtle);
         border-radius: .5rem;
-        color: #94a3b8;
+        color: var(--text-muted);
         font-size: .8125rem;
         padding: .25rem .625rem;
         cursor: pointer;
@@ -140,7 +140,7 @@ $authUser = Session::user();
     .notif-empty {
         text-align: center;
         padding: 4rem 2rem;
-        color: #475569;
+        color: var(--text-muted);
     }
     .notif-empty i { font-size: 3.5rem; display: block; margin-bottom: 1rem; }
     .notif-empty p { font-size: .9375rem; margin: 0; }
@@ -169,7 +169,7 @@ $authUser = Session::user();
 <!-- ── Page header ──────────────────────────────────────────────────────────── -->
 <div class="notif-header">
     <div class="notif-title-area">
-        <h2 style="font-size:1.125rem; font-weight:700; margin:0; color:#f8fafc;">Your Notifications</h2>
+        <h2 style="font-size:1.125rem; font-weight:700; margin:0; color:var(--text-color);">Your Notifications</h2>
         <?php if ($unreadCount > 0): ?>
             <span class="notif-count-badge" id="unreadBadgePage"><?= $unreadCount ?></span>
         <?php endif; ?>

@@ -35,7 +35,7 @@ $authUser = Session::user();
 }
 .search-input {
     padding: .5rem .875rem .5rem 2.25rem;
-    background: rgba(255,255,255,.05);
+    background: var(--glass-bg-5);
     border: 1px solid var(--border-subtle);
     border-radius: .5rem;
     color: var(--text-primary);
@@ -47,7 +47,7 @@ $authUser = Session::user();
 .search-input:focus { border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(79,70,229,.2); }
 
 .viol-table { width: 100%; border-collapse: collapse; }
-.viol-table thead tr { background: rgba(255,255,255,.03); }
+.viol-table thead tr { background: var(--glass-bg-3); }
 .viol-table th {
     padding: .75rem 1rem;
     font-size: .75rem;
@@ -61,13 +61,13 @@ $authUser = Session::user();
 .viol-table td {
     padding: .875rem 1rem;
     font-size: .875rem;
-    border-bottom: 1px solid rgba(255,255,255,.04);
+    border-bottom: 1px solid var(--border-subtle);
     color: var(--text-primary);
     vertical-align: middle;
 }
 .viol-table tbody tr:last-child td { border-bottom: none; }
 .viol-table tbody tr { transition: background .12s; }
-.viol-table tbody tr:hover { background: rgba(255,255,255,.025); }
+.viol-table tbody tr:hover { background: var(--glass-bg-3); }
 
 /* Badges */
 .badge-sev, .badge-status {
@@ -148,8 +148,8 @@ $authUser = Session::user();
 
 /* Pagination */
 .app-pagination .page-link {
-    background: rgba(255,255,255,.04);
-    border-color: rgba(255,255,255,.1);
+    background: var(--glass-bg-4);
+    border-color: var(--glass-border-10);
     color: var(--text-muted);
     font-size: .8rem;
 }

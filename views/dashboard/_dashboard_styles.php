@@ -38,12 +38,12 @@
 .btn-dash-action:hover { filter: brightness(1.12); transform: translateY(-1px); }
 .btn-primary-dash { background: linear-gradient(135deg,#4f46e5,#7c3aed); color: #fff; }
 .btn-warning-dash { background: linear-gradient(135deg,#d97706,#f59e0b); color: #1c1917; }
-.btn-neutral-dash { background: rgba(255,255,255,.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,.1); }
+.btn-neutral-dash { background: var(--glass-bg-8); color: var(--text-nav); border: 1px solid var(--glass-border-10); }
 
 /* ── KPI cards ──────────────────────────────────────────────────────────────── */
 .kpi-card {
-    background: #1e293b;
-    border: 1px solid rgba(255,255,255,.08);
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: .875rem;
     padding: 1.25rem;
     transition: transform .2s, box-shadow .2s;
@@ -60,12 +60,12 @@
     margin-bottom: .75rem;
 }
 .kpi-value {
-    font-size: 1.75rem; font-weight: 800; color: #f8fafc; line-height: 1;
+    font-size: 1.75rem; font-weight: 800; color: var(--text-primary); line-height: 1;
     margin-bottom: .3rem;
 }
 .kpi-label {
     font-size: .75rem; font-weight: 600; text-transform: uppercase;
-    letter-spacing: .06em; color: #64748b;
+    letter-spacing: .06em; color: var(--text-muted);
 }
 .kpi-link {
     display: inline-flex; align-items: center; gap: .3rem;
@@ -76,41 +76,41 @@
 
 /* ── Secondary KPI (compact) ────────────────────────────────────────────────── */
 .kpi-card-sm {
-    background: #1e293b;
-    border: 1px solid rgba(255,255,255,.08);
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: .75rem;
     padding: .875rem 1rem;
     display: flex; align-items: center; gap: .875rem;
     font-size: 1.25rem;
 }
-.kpi-sm-val   { font-size: 1.1rem; font-weight: 700; color: #f8fafc; line-height: 1.2; }
-.kpi-sm-label { font-size: .7rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+.kpi-sm-val   { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+.kpi-sm-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
 
 /* ── Chart cards ────────────────────────────────────────────────────────────── */
 .chart-card {
-    background: #1e293b;
-    border: 1px solid rgba(255,255,255,.08);
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: .875rem;
     padding: 1.25rem;
 }
 .chart-card-title {
-    font-size: .875rem; font-weight: 700; color: #e2e8f0;
+    font-size: .875rem; font-weight: 700; color: var(--text-primary);
     margin-bottom: 1rem;
     display: flex; align-items: center;
 }
 
 /* ── Table cards ────────────────────────────────────────────────────────────── */
 .dash-table-card {
-    background: #1e293b;
-    border: 1px solid rgba(255,255,255,.08);
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: .875rem;
     overflow: hidden;
 }
 .dash-table-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-    font-size: .875rem; font-weight: 700; color: #e2e8f0;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: .875rem; font-weight: 700; color: var(--text-primary);
 }
 .dash-table-link {
     font-size: .8125rem; color: #818cf8; text-decoration: none;
@@ -118,23 +118,23 @@
 .dash-table-link:hover { color: #a5b4fc; }
 .dash-table {
     width: 100%; border-collapse: collapse;
-    font-size: .8125rem; color: #cbd5e1;
+    font-size: .8125rem; color: var(--text-nav);
 }
 .dash-table thead th {
     padding: .65rem 1rem;
     font-size: .6875rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: .06em;
-    color: #64748b; border-bottom: 1px solid rgba(255,255,255,.06);
+    color: var(--text-muted); border-bottom: 1px solid var(--border-subtle);
     white-space: nowrap;
 }
 .dash-table tbody td {
     padding: .65rem 1rem;
-    border-bottom: 1px solid rgba(255,255,255,.04);
+    border-bottom: 1px solid var(--border-subtle);
     vertical-align: middle;
 }
 .dash-table tbody tr:last-child td { border-bottom: none; }
-.dash-table tbody tr:hover { background: rgba(255,255,255,.03); }
-.text-muted-sm { color: #64748b; font-size: .8rem; }
+.dash-table tbody tr:hover { background: var(--glass-bg-3); }
+.text-muted-sm { color: var(--text-muted); font-size: .8rem; }
 
 /* ── Badges ─────────────────────────────────────────────────────────────────── */
 .sev-badge {
@@ -171,7 +171,7 @@
 .dash-empty {
     display: flex; flex-direction: column; align-items: center;
     padding: 2.5rem 1rem; text-align: center;
-    color: #475569; font-size: .875rem; gap: .5rem;
+    color: var(--text-muted); font-size: .875rem; gap: .5rem;
 }
 .dash-empty i { font-size: 2rem; }
 

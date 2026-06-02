@@ -219,13 +219,36 @@ foreach ($_statusMap as $key => $val) {
 <?php if ($total > 0 && !empty($_chartData)): ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
-Chart.defaults.color = '#94a3b8';
-Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+const rootStyles = getComputedStyle(document.documentElement);
+function getChartColors() {
+    return {
+        text: rootStyles.getPropertyValue('--text-muted').trim() || '#94a3b8',
+        border: rootStyles.getPropertyValue('--border-subtle').trim() || 'rgba(255,255,255,0.06)',
+        bg: rootStyles.getPropertyValue('--chart-border').trim() || '#0f172a'
+    };
+}
+
+let cColors = getChartColors();
+Chart.defaults.color = cColors.text;
+Chart.defaults.borderColor = cColors.border;
+
+window.addEventListener('themechanged', () => {
+    cColors = getChartColors();
+    Chart.defaults.color = cColors.text;
+    Chart.defaults.borderColor = cColors.border;
+    for (let id in Chart.instances) {
+        let chart = Chart.instances[id];
+        if (chart.config.type === 'doughnut') {
+            chart.data.datasets.forEach(ds => ds.borderColor = cColors.bg);
+        }
+        chart.update();
+    }
+});
 new Chart(document.getElementById('chartStudentStatus'), {
     type: 'doughnut',
     data: {
         labels: <?= json_encode($_chartLabels) ?>,
-        datasets: [{ data: <?= json_encode($_chartData) ?>, backgroundColor: <?= json_encode($_chartBg) ?>, borderWidth: 2, borderColor: '#0f172a' }]
+        datasets: [{ data: <?= json_encode($_chartData) ?>, backgroundColor: <?= json_encode($_chartBg) ?>, borderWidth: 2, borderColor: cColors.bg }]
     },
     options: {
         responsive: true, maintainAspectRatio: false, cutout: '62%',

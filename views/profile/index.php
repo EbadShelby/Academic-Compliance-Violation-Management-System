@@ -35,7 +35,7 @@
 .field-input {
     width: 100%;
     padding: .625rem .875rem;
-    background: rgba(255,255,255,.05);
+    background: var(--glass-bg-5);
     border: 1px solid var(--border-subtle);
     border-radius: .625rem;
     color: var(--text-primary);
@@ -48,8 +48,9 @@
     box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
 .field-input:disabled {
-    background: rgba(255,255,255,.02);
-    color: rgba(255,255,255,.4);
+    background: var(--glass-bg-2);
+    color: var(--text-muted);
+    opacity: 0.7;
     cursor: not-allowed;
 }
 .field-input.is-invalid { border-color: rgba(248,113,113,.6); }

@@ -29,7 +29,7 @@ function _notif_widget_rel(string $ts): string {
 <div style="margin-top:1.75rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
         <div style="display:flex;align-items:center;gap:.75rem;">
-            <span style="font-size:1rem;font-weight:700;color:#f8fafc;">Recent Notifications</span>
+            <span style="font-size:1rem;font-weight:700;color:var(--text-color);">Recent Notifications</span>
             <?php if ($unreadCount > 0): ?>
             <span style="background:#f87171;color:#fff;font-size:.6875rem;font-weight:700;padding:2px 7px;border-radius:9px;"><?= $unreadCount ?> unread</span>
             <?php endif; ?>
@@ -40,12 +40,12 @@ function _notif_widget_rel(string $ts): string {
     </div>
 
     <?php if (empty($recentNotifications)): ?>
-    <div class="dash-empty" style="background:#1e293b;border:1px solid rgba(255,255,255,.08);border-radius:.875rem;">
+    <div class="dash-empty" style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:.875rem;">
         <i class="bi bi-bell-slash"></i>
         <p style="margin:0;">No notifications yet.</p>
     </div>
     <?php else: ?>
-    <div style="background:#1e293b;border:1px solid rgba(255,255,255,.08);border-radius:.875rem;overflow:hidden;">
+    <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:.875rem;overflow:hidden;">
         <?php foreach ($recentNotifications as $i => $_notif):
             $_cfg      = $_ntTypeConfig[$_notif['type']] ?? $_ntTypeConfig['info'];
             $_isUnread = (int) $_notif['is_read'] === 0;
@@ -53,16 +53,16 @@ function _notif_widget_rel(string $ts): string {
         <div style="
             display:flex;align-items:center;gap:.875rem;
             padding:.875rem 1.125rem;
-            <?= $i < count($recentNotifications) - 1 ? 'border-bottom:1px solid rgba(255,255,255,.06);' : '' ?>
+            <?= $i < count($recentNotifications) - 1 ? 'border-bottom:1px solid var(--border-subtle);' : '' ?>
             <?= $_isUnread ? 'background:rgba(79,70,229,.06);' : '' ?>
             transition:background .15s;
         ">
             <i class="bi <?= $_cfg['icon'] ?>" style="color:<?= $_cfg['color'] ?>;font-size:1.0625rem;flex-shrink:0;"></i>
             <div style="flex:1;min-width:0;">
-                <div style="font-size:.875rem;font-weight:<?= $_isUnread ? '600' : '400' ?>;color:<?= $_isUnread ? '#f8fafc' : '#94a3b8' ?>;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                <div style="font-size:.875rem;font-weight:<?= $_isUnread ? '600' : '400' ?>;color:<?= $_isUnread ? 'var(--text-color)' : 'var(--text-muted)' ?>;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                     <?= htmlspecialchars($_notif['title']) ?>
                 </div>
-                <div style="font-size:.8125rem;color:#64748b;margin-top:.1rem;"><?= _notif_widget_rel($_notif['created_at']) ?></div>
+                <div style="font-size:.8125rem;color:var(--text-muted);margin-top:.1rem;"><?= _notif_widget_rel($_notif['created_at']) ?></div>
             </div>
             <?php if ($_isUnread): ?>
             <span style="width:8px;height:8px;border-radius:50%;background:#4f46e5;flex-shrink:0;"></span>
