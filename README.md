@@ -2,9 +2,20 @@
 
 A comprehensive web-based system designed to track student violations, manage disciplinary actions, and provide data-driven insights through an intuitive, role-based interface. It streamlines the entire violation management lifecycle from reporting and evidence attachment to AI-powered severity assessment and student appeals.
 
+## 🎯 Problem Statement
+
+Educational institutions frequently struggle with the manual, paper-based tracking of academic and behavioral violations, which often leads to lost records, inconsistent disciplinary actions, and a lack of transparency for students. Without a centralized digital system, administrators spend excessive time processing reports, while students lack a clear, accessible avenue to view their disciplinary standing or submit formal appeals. The Academic Compliance & Violation Management System (ACVMS) addresses this by providing a secure, centralized, and AI-assisted platform to streamline the reporting, review, and resolution of student violations, ensuring fairness, maintaining immutable records, and upholding academic integrity.
+
+## 👥 Team Members
+
+- **Ebad, Yasser C.**
+- **Manial. Mohammed, A.**
+- **Mentang, Rayyan A.**
+- **Singsing, Adnan M.**
+
 ## ✨ Features
 
-- **Role-Based Access Control**: Distinct interfaces and permissions for Administrators, Teachers, and Students.
+- **Role-Based Access Control**: Distinct interfaces and permissions for Administrators, Registrar, Teachers, and Students.
 - **Violation Management**: Full CRUD operations for disciplinary reports with strict role-based access control and file attachment support for evidence.
 - **AI Severity Assessment**: Integrated with Google Gemini AI to analyze violation descriptions and automatically suggest severity levels and potential actions.
 - **Student Appeals Workflow**: Allows students to formally submit defenses or appeals for recorded violations.
@@ -15,12 +26,29 @@ A comprehensive web-based system designed to track student violations, manage di
 - **User Management**:
   - Bulk User Import via CSV file upload.
   - Self-Service User Profiles (update personal details, change passwords).
-  - Secure "Forgot Password" self-service recovery system using native PHP mail.
+  - Secure "Forgot Password" self-service recovery system using php mailer.
 - **Reporting & Auditing**:
   - Data Export (CSV) for violation reports and system logs for administrative filing.
   - Comprehensive Audit Logging for immutable tracking of all system events.
 - **System-Wide Pagination**: Optimized data fetching and rendering for large datasets across the system.
 - **Role-Based Dashboards**: Real-time aggregated statistics, trend analysis, and Chart.js visualizations for actionable data insights.
+- **In-App Notification System**: Role-specific real-time alerts for case updates, appeals, and administrative actions.
+- **Dark & Light Theme Support**: Integrated system-wide theme toggling for enhanced accessibility and user preference.
+
+## ⚖️ Ethics & Compliance Statement
+
+This Academic Compliance & Violation Management System (ACVMS) is designed with a strong commitment to ethical principles, data privacy, and equitable academic management.
+
+**1. Data Privacy Compliance (RA 10173 — Data Privacy Act of 2012)**
+We strictly adhere to the provisions of the Philippine Data Privacy Act of 2012. All student records, violation reports, and personal information collected within this system are treated with the utmost confidentiality. Data collection is limited strictly to what is necessary for maintaining academic compliance. User consent is implied for administrative purposes within the educational institution, and data is never shared with unauthorized third parties.
+
+**2. Security Measures to Protect User Data**
+To safeguard sensitive academic and personal data, the system implements robust security mechanisms. All user passwords are encrypted using modern `bcrypt` hashing algorithms. The application enforces CSRF (Cross-Site Request Forgery) token protection on all state-changing forms to prevent unauthorized actions. Additionally, IP-based login rate limiting is in place to protect against brute-force attacks, and strict role-based access control (RBAC) ensures that users can only access data relevant to their specific clearance level, preventing unauthorized data exposure.
+
+**3. Responsible Use of AI-Generated Output & User-Submitted Data**
+Our integration of the Google Gemini API is designed strictly as an _assistive_ tool, not an authoritative one. The AI analyzes user-submitted violation descriptions to suggest severity levels; however, all AI-generated outputs require human review and final approval by the Registrar or Administrator. We mandate that AI is used responsibly to ensure fairness and prevent algorithmic bias from independently determining a student's academic standing. User-submitted data is only processed for the explicit purpose of incident resolution.
+
+---
 
 ## 🛠️ Technology Stack
 
