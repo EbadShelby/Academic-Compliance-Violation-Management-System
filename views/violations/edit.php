@@ -99,6 +99,25 @@
                     </div>
                     <div class="form-card-body">
 
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label-custom">
+                                Violation Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="description" id="description" rows="6"
+                                      class="form-control-custom <?= isset($errors['description']) ? 'is-invalid' : '' ?>"
+                                      placeholder="Provide a detailed account of the incident (minimum 20 characters)…"
+                                      required><?= htmlspecialchars($old['description'] ?? $violation['description']) ?></textarea>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <?php if (isset($errors['description'])): ?>
+                                <div class="field-error"><?= htmlspecialchars($errors['description']) ?></div>
+                                <?php else: ?>
+                                <div class="field-hint">Minimum 20 characters. Be factual and objective.</div>
+                                <?php endif; ?>
+                                <small class="text-muted" id="descCounter">0 / 5000</small>
+                            </div>
+                        </div>
+
                         <div class="row g-3 mb-3">
                             <!-- Category -->
                             <div class="col-sm-6">
@@ -140,25 +159,6 @@
                                 <?php if (isset($errors['severity'])): ?>
                                 <div class="field-error"><?= htmlspecialchars($errors['severity']) ?></div>
                                 <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="mb-3">
-                            <label for="description" class="form-label-custom">
-                                Violation Description <span class="text-danger">*</span>
-                            </label>
-                            <textarea name="description" id="description" rows="6"
-                                      class="form-control-custom <?= isset($errors['description']) ? 'is-invalid' : '' ?>"
-                                      placeholder="Provide a detailed account of the incident (minimum 20 characters)…"
-                                      required><?= htmlspecialchars($old['description'] ?? $violation['description']) ?></textarea>
-                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                <?php if (isset($errors['description'])): ?>
-                                <div class="field-error"><?= htmlspecialchars($errors['description']) ?></div>
-                                <?php else: ?>
-                                <div class="field-hint">Minimum 20 characters. Be factual and objective.</div>
-                                <?php endif; ?>
-                                <small class="text-muted" id="descCounter">0 / 5000</small>
                             </div>
                         </div>
 

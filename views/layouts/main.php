@@ -25,6 +25,8 @@
             --text-nav:        #cbd5e1;
         }
 
+        .text-muted { color: var(--text-muted) !important; }
+
         *, *::before, *::after { box-sizing: border-box; }
         html, body { height: 100%; margin: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--surface-dark); color: var(--text-primary); }
 

@@ -104,6 +104,25 @@
                     </div>
                     <div class="form-card-body">
 
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label-custom">
+                                Violation Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="description" id="description" rows="6"
+                                      class="form-control-custom <?= isset($errors['description']) ? 'is-invalid' : '' ?>"
+                                      placeholder="Provide a detailed account of the incident (minimum 20 characters)…"
+                                      required><?= htmlspecialchars($old['description'] ?? '') ?></textarea>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <?php if (isset($errors['description'])): ?>
+                                <div class="field-error"><?= htmlspecialchars($errors['description']) ?></div>
+                                <?php else: ?>
+                                <div class="field-hint">Minimum 20 characters. Be factual and objective.</div>
+                                <?php endif; ?>
+                                <small class="text-muted" id="descCounter">0 / 5000</small>
+                            </div>
+                        </div>
+
                         <div class="row g-3 mb-3">
                             <!-- Category -->
                             <div class="col-sm-6">
@@ -186,72 +205,52 @@
                                 <?php if (isset($errors['severity'])): ?>
                                 <div class="field-error"><?= htmlspecialchars($errors['severity']) ?></div>
                                 <?php endif; ?>
-                            </div>
-                        </div>
 
-                        <!-- Description -->
-                        <div class="mb-3">
-                            <label for="description" class="form-label-custom">
-                                Violation Description <span class="text-danger">*</span>
-                            </label>
-                            <textarea name="description" id="description" rows="6"
-                                      class="form-control-custom <?= isset($errors['description']) ? 'is-invalid' : '' ?>"
-                                      placeholder="Provide a detailed account of the incident (minimum 20 characters)…"
-                                      required><?= htmlspecialchars($old['description'] ?? '') ?></textarea>
-                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                <?php if (isset($errors['description'])): ?>
-                                <div class="field-error"><?= htmlspecialchars($errors['description']) ?></div>
-                                <?php else: ?>
-                                <div class="field-hint">Minimum 20 characters. Be factual and objective.</div>
-                                <?php endif; ?>
-                                <small class="text-muted" id="descCounter">0 / 5000</small>
-                            </div>
-                        </div>
-
-                        <!-- ── AI Severity Assessment ──────────────────────── -->
-                        <div class="ai-assess-wrap">
-                            <button type="button" id="aiAssessBtn" class="btn-ai-assess">
-                                <i class="bi bi-stars"></i>
-                                <span id="aiAssessBtnText">AI Assess Severity</span>
-                            </button>
-                            <span class="ai-hint-text">Let AI suggest a severity level based on your description</span>
-                        </div>
-
-                        <!-- AI result card (hidden until response) -->
-                        <div id="aiResultCard" class="ai-result-card" style="display:none;" aria-live="polite">
-                            <!-- Loading state -->
-                            <div id="aiLoading" class="ai-loading" style="display:none;">
-                                <div class="ai-spinner"></div>
-                                <span>Analysing violation description…</span>
-                            </div>
-
-                            <!-- Error state -->
-                            <div id="aiError" class="ai-error" style="display:none;">
-                                <i class="bi bi-exclamation-circle"></i>
-                                <span id="aiErrorText"></span>
-                            </div>
-
-                            <!-- Success state -->
-                            <div id="aiSuccess" style="display:none;">
-                                <div class="ai-result-header">
-                                    <i class="bi bi-stars ai-icon"></i>
-                                    <span class="ai-result-label">AI Severity Suggestion</span>
-                                    <span id="aiConfidencePill" class="ai-confidence-pill"></span>
+                                <!-- ── AI Severity Assessment ──────────────────────── -->
+                                <div class="ai-assess-wrap mt-2">
+                                    <button type="button" id="aiAssessBtn" class="btn-ai-assess">
+                                        <i class="bi bi-stars"></i>
+                                        <span id="aiAssessBtnText">AI Assess Severity</span>
+                                    </button>
                                 </div>
-                                <div class="ai-result-body">
-                                    <div class="ai-suggested-severity">
-                                        <span class="ai-sev-prefix">Suggested:</span>
-                                        <span id="aiSeverityBadge" class="ai-severity-badge"></span>
+
+                                <!-- AI result card (hidden until response) -->
+                                <div id="aiResultCard" class="ai-result-card" style="display:none;" aria-live="polite">
+                                    <!-- Loading state -->
+                                    <div id="aiLoading" class="ai-loading" style="display:none;">
+                                        <div class="ai-spinner"></div>
+                                        <span>Analysing violation description…</span>
                                     </div>
-                                    <p id="aiReasoning" class="ai-reasoning"></p>
-                                </div>
-                                <div class="ai-result-actions">
-                                    <button type="button" id="aiAcceptBtn" class="btn-ai-accept">
-                                        <i class="bi bi-check2-circle"></i> Apply to Severity Field
-                                    </button>
-                                    <button type="button" id="aiDismissBtn" class="btn-ai-dismiss">
-                                        Dismiss
-                                    </button>
+
+                                    <!-- Error state -->
+                                    <div id="aiError" class="ai-error" style="display:none;">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        <span id="aiErrorText"></span>
+                                    </div>
+
+                                    <!-- Success state -->
+                                    <div id="aiSuccess" style="display:none;">
+                                        <div class="ai-result-header">
+                                            <i class="bi bi-stars ai-icon"></i>
+                                            <span class="ai-result-label">AI Severity Suggestion</span>
+                                            <span id="aiConfidencePill" class="ai-confidence-pill"></span>
+                                        </div>
+                                        <div class="ai-result-body">
+                                            <div class="ai-suggested-severity">
+                                                <span class="ai-sev-prefix">Suggested:</span>
+                                                <span id="aiSeverityBadge" class="ai-severity-badge"></span>
+                                            </div>
+                                            <p id="aiReasoning" class="ai-reasoning"></p>
+                                        </div>
+                                        <div class="ai-result-actions">
+                                            <button type="button" id="aiAcceptBtn" class="btn-ai-accept">
+                                                <i class="bi bi-check2-circle"></i> Apply to Severity Field
+                                            </button>
+                                            <button type="button" id="aiDismissBtn" class="btn-ai-dismiss">
+                                                Dismiss
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
