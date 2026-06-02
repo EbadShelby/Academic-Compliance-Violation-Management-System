@@ -80,7 +80,9 @@ CREATE TABLE IF NOT EXISTS `violations` (
     `type`          VARCHAR(100)    NOT NULL,
     `description`   TEXT            NOT NULL,
     `severity`      ENUM('minor','moderate','major','critical') NOT NULL DEFAULT 'minor',
-    `status`        ENUM('open','under_review','resolved','dismissed') NOT NULL DEFAULT 'open',
+    `status`        ENUM('pending','under_review','resolved','rejected','closed') NOT NULL DEFAULT 'pending',
+    `sanction_notes` TEXT NULL COMMENT 'Admin-assigned sanction details',
+    `rejection_reason` TEXT NULL COMMENT 'Required reason when a case is rejected',
     `incident_date` DATE            NOT NULL,
     `created_at`    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -164,6 +166,29 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
     `expires_at` TIMESTAMP    NOT NULL,
     PRIMARY KEY (`id`),
     KEY `idx_password_resets_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 8. NOTIFICATIONS
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `notifications` (
+    `id`              INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
+    `user_id`         INT UNSIGNED  NOT NULL,
+    `title`           VARCHAR(255)  NOT NULL,
+    `message`         TEXT          NOT NULL,
+    `type`            ENUM('info','success','warning','danger') NOT NULL DEFAULT 'info',
+    `is_read`         TINYINT(1)    NOT NULL DEFAULT 0,
+    `reference_id`    INT UNSIGNED  NULL,
+    `reference_table` VARCHAR(64)   NULL,
+    `created_at`      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT `fk_notifications_user`
+        FOREIGN KEY (`user_id`)
+        REFERENCES `users`(`id`)
+        ON DELETE CASCADE,
+
+    INDEX `idx_notifications_user_read` (`user_id`, `is_read`),
+    INDEX `idx_notifications_created`   (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET foreign_key_checks = 1;
