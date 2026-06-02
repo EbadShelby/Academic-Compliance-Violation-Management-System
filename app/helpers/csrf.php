@@ -40,7 +40,7 @@ function csrf_field(): string
 function verify_csrf_token(?string $token = null): bool
 {
     if ($token === null) {
-        $token = $_POST['csrf_token'] ?? '';
+        $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
     }
 
     if (empty($_SESSION['csrf_token']) || empty($token)) {

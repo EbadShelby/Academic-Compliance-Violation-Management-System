@@ -22,7 +22,7 @@
 
 class AIClassificationService
 {
-    private const API_ENDPOINT       = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent';
+    private const API_ENDPOINT       = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
     private const TIMEOUT_SECONDS     = 15;  // JSON calls (fast, deterministic)
     private const TEXT_TIMEOUT_SECONDS = 30;  // Prose calls (slower — model "thinks" before writing)
 

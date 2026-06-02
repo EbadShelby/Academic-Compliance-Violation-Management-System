@@ -284,9 +284,13 @@ $authUser = Session::user();
         var id  = btn.dataset.id;
         var url = btn.dataset.url;
 
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         fetch(url, {
             method:  'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            headers: { 
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken 
+            },
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
@@ -323,9 +327,13 @@ $authUser = Session::user();
     if (markAllForm) {
         markAllForm.addEventListener('submit', function (e) {
             e.preventDefault();
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             fetch(markAllForm.action, {
                 method:  'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken 
+                },
             })
             .then(function (r) { return r.json(); })
             .then(function (data) {

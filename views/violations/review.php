@@ -758,11 +758,13 @@ $aiCasePayload = json_encode([
         showSummaryState('loading');
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const response = await fetch('<?= APP_URL ?>/ai/summarize-case', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 body: JSON.stringify(caseData)
             });

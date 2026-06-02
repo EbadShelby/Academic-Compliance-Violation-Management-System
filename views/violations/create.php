@@ -876,11 +876,13 @@ textarea.form-control-custom { resize: vertical; min-height: 120px; line-height:
         showAiState('loading');
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const response = await fetch('<?= APP_URL ?>/ai/assess-severity', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 body: JSON.stringify({ description, type })
             });
@@ -981,11 +983,13 @@ textarea.form-control-custom { resize: vertical; min-height: 120px; line-height:
         showCatState('loading');
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const response = await fetch('<?= APP_URL ?>/ai/classify-category', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 body: JSON.stringify({ description })
             });
