@@ -22,7 +22,7 @@
 
 class AIClassificationService
 {
-    private const API_ENDPOINT       = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    private const API_ENDPOINT       = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
     private const TIMEOUT_SECONDS     = 15;  // JSON calls (fast, deterministic)
     private const TEXT_TIMEOUT_SECONDS = 30;  // Prose calls (slower — model "thinks" before writing)
 
@@ -286,7 +286,7 @@ PROMPT;
             'generationConfig' => [
                 'temperature'      => 0.2,            // Low temp → deterministic, factual
                 'maxOutputTokens'  => 8192,           // Very generous — actual JSON output is ~30 tokens;
-                                                      // JSON-constrained mode can over-count, so give plenty of room
+                // JSON-constrained mode can over-count, so give plenty of room
                 'topP'             => 0.8,
                 'responseMimeType' => 'application/json', // Force pure JSON, no markdown fences
             ],
@@ -386,7 +386,7 @@ PROMPT;
             'generationConfig' => [
                 'temperature'     => 0.4,   // Slightly higher for natural prose
                 'maxOutputTokens' => 8192,  // Generous ceiling — prose summaries vary in length;
-                                            // better to over-provision than truncate mid-sentence
+                // better to over-provision than truncate mid-sentence
                 'topP'            => 0.9,
                 // No responseMimeType — plain text output
             ],
