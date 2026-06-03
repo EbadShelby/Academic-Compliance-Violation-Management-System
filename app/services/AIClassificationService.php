@@ -22,7 +22,26 @@
 
 class AIClassificationService
 {
-    private const API_ENDPOINT       = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    /**
+     * Available Gemini Models for Fallback/Testing
+     * If you hit a rate limit, simply copy and paste one of these endpoints:
+     * 
+     * Gemini 2.5 Flash:
+     * 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+     * 
+     * Gemini 3.5 Flash:
+     * 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'
+     * 
+     * Gemini 3.1 Flash Lite:
+     * 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent'
+     * 
+     * Gemini 2.5 Flash Lite:
+     * 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent'
+     * 
+     * Gemini 3 Flash:
+     * 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent'
+     */
+    private const API_ENDPOINT       = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent';
     private const TIMEOUT_SECONDS     = 15;  // JSON calls (fast, deterministic)
     private const TEXT_TIMEOUT_SECONDS = 30;  // Prose calls (slower — model "thinks" before writing)
 
@@ -301,7 +320,7 @@ PROMPT;
 
         while ($attempt < $maxRetries) {
             $attempt++;
-            
+
             $ch = curl_init($url);
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
@@ -320,10 +339,10 @@ PROMPT;
 
             // Retry on cURL error, 503 Service Unavailable, or 429 Too Many Requests
             if (($curlErr || $httpCode === 503 || $httpCode === 429 || $httpCode >= 500) && $attempt < $maxRetries) {
-                sleep(1); // Wait 1 second before retrying
+                sleep($attempt * 2); // Wait progressively longer before retrying
                 continue;
             }
-            
+
             break; // Success or non-retriable error
         }
 
@@ -344,6 +363,11 @@ PROMPT;
 
         if ($httpCode === 429) {
             return ['success' => false, 'text' => null, 'error' => 'AI service rate limit reached. Please try again in a moment.'];
+        }
+
+        if ($httpCode === 503) {
+            error_log('ACVMS AIClassificationService::callGemini — 503 Service Unavailable: ' . $response);
+            return ['success' => false, 'text' => null, 'error' => 'AI service is currently unavailable or overloaded. Please try again later.'];
         }
 
         if ($httpCode !== 200) {
@@ -406,7 +430,7 @@ PROMPT;
 
         while ($attempt < $maxRetries) {
             $attempt++;
-            
+
             $ch = curl_init($url);
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
@@ -425,10 +449,10 @@ PROMPT;
 
             // Retry on cURL error, 503 Service Unavailable, or 429 Too Many Requests
             if (($curlErr || $httpCode === 503 || $httpCode === 429 || $httpCode >= 500) && $attempt < $maxRetries) {
-                sleep(1); // Wait 1 second before retrying
+                sleep($attempt * 2); // Wait progressively longer before retrying
                 continue;
             }
-            
+
             break; // Success or non-retriable error
         }
 
@@ -439,6 +463,11 @@ PROMPT;
 
         if ($httpCode === 429) {
             return ['success' => false, 'text' => null, 'error' => 'AI service rate limit reached. Please try again in a moment.'];
+        }
+
+        if ($httpCode === 503) {
+            error_log('ACVMS AIClassificationService::callGeminiText — 503 Service Unavailable: ' . $response);
+            return ['success' => false, 'text' => null, 'error' => 'AI service is currently unavailable or overloaded. Please try again later.'];
         }
 
         if ($httpCode !== 200) {

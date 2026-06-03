@@ -58,11 +58,11 @@ class AIController extends Controller
 
             // Basic server-side guard
             if (strlen($description) < 10) {
-                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description must be at least 10 characters.'], 422);
+                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description must be at least 10 characters.']);
             }
 
             if (strlen($description) > 5000) {
-                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description exceeds maximum length.'], 422);
+                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description exceeds maximum length.']);
             }
 
             // Load and call the AI service
@@ -78,7 +78,7 @@ class AIController extends Controller
                     'success' => false,
                     'data'    => null,
                     'error'   => $result['error'],
-                ], 503);
+                ]);
             }
 
             $this->sendJson([
@@ -131,11 +131,11 @@ class AIController extends Controller
             $description = trim($input['description'] ?? '');
 
             if (strlen($description) < 10) {
-                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description must be at least 10 characters.'], 422);
+                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description must be at least 10 characters.']);
             }
 
             if (strlen($description) > 5000) {
-                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description exceeds maximum length.'], 422);
+                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description exceeds maximum length.']);
             }
 
             if (!class_exists('AIClassificationService', false)) {
@@ -146,7 +146,7 @@ class AIController extends Controller
             $result = $ai->classifyCategory($description);
 
             if (!$result['success']) {
-                $this->sendJson(['success' => false, 'data' => null, 'error' => $result['error']], 503);
+                $this->sendJson(['success' => false, 'data' => null, 'error' => $result['error']]);
             }
 
             $this->sendJson([
@@ -200,11 +200,11 @@ class AIController extends Controller
             $type        = trim($input['type']        ?? '');
 
             if (strlen($description) < 10) {
-                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description is required and must be at least 10 characters.'], 422);
+                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Description is required and must be at least 10 characters.']);
             }
 
             if (!$type) {
-                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Violation type is required for case summary.'], 422);
+                $this->sendJson(['success' => false, 'data' => null, 'error' => 'Violation type is required for case summary.']);
             }
 
             if (!class_exists('AIClassificationService', false)) {
@@ -223,7 +223,7 @@ class AIController extends Controller
             ]);
 
             if (!$result['success']) {
-                $this->sendJson(['success' => false, 'data' => null, 'error' => $result['error']], 503);
+                $this->sendJson(['success' => false, 'data' => null, 'error' => $result['error']]);
             }
 
             $this->sendJson([
