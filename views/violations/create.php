@@ -360,6 +360,60 @@
     </form>
 </div>
 
+<!-- ══ PRE-SUBMISSION COMPLIANCE CONFIRMATION MODAL ═════════════════════ -->
+<div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="submitConfirmLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:500px;">
+        <div class="modal-content" style="background:var(--surface-card);border:1px solid rgba(249,115,22,.3);border-radius:1.25rem;overflow:hidden;">
+
+            <div class="modal-header" style="background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(239,68,68,.08));border-bottom:1px solid rgba(249,115,22,.2);padding:1.125rem 1.5rem;">
+                <div style="display:flex;align-items:center;gap:.875rem;">
+                    <div style="width:40px;height:40px;border-radius:.75rem;background:linear-gradient(135deg,#f97316,#ef4444);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;flex-shrink:0;box-shadow:0 4px 14px rgba(249,115,22,.35);">
+                        <i class="bi bi-send-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title" id="submitConfirmLabel" style="font-size:.9375rem;font-weight:700;color:var(--text-primary);margin:0;">Confirm Violation Report</h5>
+                        <p style="font-size:.73rem;color:var(--text-muted);margin:.1rem 0 0;">Please review before submitting</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body" style="padding:1.375rem 1.5rem;">
+
+                <div id="submitConfirmSummary" style="padding:.875rem 1rem;background:var(--glass-bg-4);border:1px solid var(--border-subtle);border-radius:.75rem;margin-bottom:1.125rem;font-size:.84rem;color:var(--text-muted);line-height:1.6;">
+                    <div style="margin-bottom:.35rem;"><strong style="color:var(--text-primary);">Student:</strong> <span id="confirmStudentName">—</span></div>
+                    <div style="margin-bottom:.35rem;"><strong style="color:var(--text-primary);">Severity:</strong> <span id="confirmSeverity">—</span></div>
+                    <div><strong style="color:var(--text-primary);">Category:</strong> <span id="confirmCategory">—</span></div>
+                </div>
+
+                <div style="padding:.875rem 1rem;background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.2);border-radius:.75rem;font-size:.825rem;color:#fdba74;line-height:1.6;">
+                    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#f97316;margin-bottom:.5rem;display:flex;align-items:center;gap:.35rem;">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Compliance Certification
+                    </div>
+                    By submitting this report, you certify that:
+                    <ul style="margin:.5rem 0 0;padding-left:1.25rem;">
+                        <li>The information provided is <strong style="color:#fed7aa;">accurate and truthful</strong> to the best of your knowledge.</li>
+                        <li>This report is <strong style="color:#fed7aa;">free from personal bias</strong> and based on observed facts or verifiable evidence.</li>
+                        <li>You understand this action is <strong style="color:#fed7aa;">permanently recorded</strong> in the system audit trail.</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="modal-footer" style="border-top:1px solid var(--border-subtle);padding:1rem 1.5rem;background:var(--glass-bg-25);gap:.75rem;">
+                <button type="button" class="btn btn-sm" id="confirmCancelBtn" data-bs-dismiss="modal"
+                        style="background:var(--glass-bg-8);color:var(--text-muted);border:1px solid var(--border-subtle);padding:.5rem 1.125rem;border-radius:.625rem;font-weight:600;font-size:.875rem;">
+                    <i class="bi bi-x-lg me-1"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-sm" id="confirmSubmitBtn"
+                        style="background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;border:none;padding:.5rem 1.25rem;border-radius:.625rem;font-weight:700;font-size:.875rem;box-shadow:0 4px 14px rgba(249,115,22,.3);">
+                    <i class="bi bi-send-fill me-1"></i> Yes, Submit Report
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <style>
 /* ── Create form styles ──────────────────────────────────────────────────── */
 .form-card {
@@ -1137,13 +1191,50 @@ textarea.form-control-custom { resize: vertical; min-height: 120px; line-height:
         renderPreviews();
     });
 
-    // ── Submit guard ───────────────────────────────────────────────────────
+    // ── Submit guard (intercept for compliance modal) ────────────────────────
     const form      = document.getElementById('violationForm');
     const submitBtn = document.getElementById('submitBtn');
+    let   formReadyToSubmit = false;
 
-    form && form.addEventListener('submit', function () {
-        submitBtn.disabled   = true;
-        submitBtn.innerHTML  = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Submitting…';
+    form && form.addEventListener('submit', function (e) {
+        if (formReadyToSubmit) {
+            // Second pass: actually submit
+            submitBtn.disabled  = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Submitting…';
+            return;
+        }
+        e.preventDefault();
+
+        // Fill in confirmation modal summary
+        const studentSel   = document.getElementById('student_id');
+        const severitySel  = document.getElementById('severity');
+        const categorySel  = document.getElementById('type');
+        const studentName  = studentSel  ? (studentSel.options[studentSel.selectedIndex]?.text || '—') : '—';
+        const severityVal  = severitySel ? (severitySel.options[severitySel.selectedIndex]?.text || '—') : '—';
+        const categoryVal  = categorySel ? (categorySel.options[categorySel.selectedIndex]?.text || '—') : '—';
+
+        const confirmStudentEl  = document.getElementById('confirmStudentName');
+        const confirmSeverityEl = document.getElementById('confirmSeverity');
+        const confirmCategoryEl = document.getElementById('confirmCategory');
+        if (confirmStudentEl)  confirmStudentEl.textContent  = studentName;
+        if (confirmSeverityEl) confirmSeverityEl.textContent = severityVal;
+        if (confirmCategoryEl) confirmCategoryEl.textContent = categoryVal;
+
+        const modal = new bootstrap.Modal(document.getElementById('submitConfirmModal'));
+        modal.show();
+
+        const confirmBtn = document.getElementById('confirmSubmitBtn');
+        confirmBtn && confirmBtn.addEventListener('click', function handler() {
+            confirmBtn.removeEventListener('click', handler);
+            formReadyToSubmit = true;
+            modal.hide();
+            // Submit after modal fully hides
+            document.getElementById('submitConfirmModal').addEventListener('hidden.bs.modal', function once() {
+                this.removeEventListener('hidden.bs.modal', once);
+                form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                form.submit();
+            });
+        });
     });
 })();
 </script>

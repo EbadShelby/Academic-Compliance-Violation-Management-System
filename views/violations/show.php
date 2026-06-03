@@ -425,6 +425,33 @@ function formatBytes(int $bytes): string {
             <?php endif; ?>
         <?php endif; ?>
 
+        <!-- ── Student Rights Notice ────────────────────────────────── -->
+        <?php if (isset($authUser['role']) && $authUser['role'] === 'student'): ?>
+        <div class="detail-card mb-4" style="border-color:rgba(99,102,241,.4);">
+            <div class="detail-card-header" style="background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(124,58,237,.06));border-bottom-color:rgba(99,102,241,.2);">
+                <i class="bi bi-person-check-fill" style="color:#818cf8;"></i>
+                <span style="color:var(--text-primary);">Your Rights</span>
+            </div>
+            <div class="detail-card-body" style="font-size:.82rem;color:var(--text-muted);line-height:1.65;">
+                <p class="mb-2">
+                    <i class="bi bi-shield-fill-check me-1" style="color:#818cf8;"></i>
+                    <strong style="color:var(--text-primary);">Right to Be Informed</strong><br>
+                    You have been granted access to view the details of this violation record filed against you.
+                </p>
+                <p class="mb-2">
+                    <i class="bi bi-chat-left-text-fill me-1" style="color:#818cf8;"></i>
+                    <strong style="color:var(--text-primary);">Right to Respond</strong><br>
+                    You may submit a defense statement or formal appeal using the form below. Your submission will be reviewed by an administrator.
+                </p>
+                <p class="mb-0">
+                    <i class="bi bi-lock-fill me-1" style="color:#818cf8;"></i>
+                    <strong style="color:var(--text-primary);">Data Confidentiality</strong><br>
+                    This record is confidential. Access is restricted to you and authorized institutional staff only.
+                </p>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- ── Audit trail note ────────────────────────────────────────── -->
         <div class="detail-card">
             <div class="detail-card-header">

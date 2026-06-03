@@ -307,14 +307,242 @@
             margin-top: 1.5rem;
         }
 
+        /* ── Ethics Modal ─────────────────────────────────────────────────── */
+        .ethics-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            opacity: 0;
+            transition: opacity .3s ease;
+            pointer-events: none;
+        }
+        .ethics-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .ethics-modal {
+            width: 100%;
+            max-width: 520px;
+            background: #0f172a;
+            border: 1px solid rgba(79, 70, 229, 0.45);
+            border-radius: 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px rgba(79,70,229,.15), 0 32px 80px rgba(0,0,0,.7), 0 0 80px rgba(79,70,229,.15);
+            transform: translateY(12px);
+            transition: transform .35s cubic-bezier(.16,1,.3,1);
+        }
+        .ethics-overlay.visible .ethics-modal {
+            transform: translateY(0);
+        }
+        .ethics-modal-header {
+            display: flex;
+            align-items: center;
+            gap: .875rem;
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(135deg, rgba(79,70,229,.18), rgba(124,58,237,.12));
+            border-bottom: 1px solid rgba(79,70,229,.25);
+        }
+        .ethics-modal-icon {
+            width: 42px; height: 42px;
+            border-radius: .75rem;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(79,70,229,.4);
+        }
+        .ethics-modal-title {
+            font-size: 1.0625rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin: 0;
+            line-height: 1.25;
+        }
+        .ethics-modal-subtitle {
+            font-size: .75rem;
+            color: #94a3b8;
+            margin: .1rem 0 0;
+        }
+        .ethics-modal-body {
+            padding: 1.5rem;
+        }
+        .ethics-section {
+            margin-bottom: 1rem;
+        }
+        .ethics-section:last-of-type {
+            margin-bottom: 0;
+        }
+        .ethics-section-title {
+            font-size: .7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .09em;
+            color: #a5b4fc;
+            margin-bottom: .4rem;
+            display: flex;
+            align-items: center;
+            gap: .35rem;
+        }
+        .ethics-section-text {
+            font-size: .8375rem;
+            color: #cbd5e1;
+            line-height: 1.65;
+            margin: 0;
+        }
+        .ethics-divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,.07);
+            margin: 1rem 0;
+        }
+        .ethics-checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: .625rem;
+            margin-top: 1.25rem;
+            padding: .875rem 1rem;
+            background: rgba(79,70,229,.08);
+            border: 1px solid rgba(79,70,229,.2);
+            border-radius: .75rem;
+        }
+        .ethics-checkbox-row input[type="checkbox"] {
+            width: 1rem; height: 1rem;
+            accent-color: #4f46e5;
+            flex-shrink: 0;
+            margin-top: .15rem;
+            cursor: pointer;
+        }
+        .ethics-checkbox-label {
+            font-size: .825rem;
+            color: #94a3b8;
+            cursor: pointer;
+            line-height: 1.5;
+            user-select: none;
+        }
+        .ethics-checkbox-label strong { color: #c7d2fe; }
+        .ethics-modal-footer {
+            padding: 1rem 1.5rem 1.5rem;
+            display: flex;
+            gap: .75rem;
+            flex-direction: column;
+        }
+        .ethics-accept-btn {
+            width: 100%;
+            padding: .8rem 1.5rem;
+            border: none;
+            border-radius: .75rem;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: #fff;
+            font-size: .9375rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s, transform .15s;
+            box-shadow: 0 4px 20px rgba(79,70,229,.4);
+            opacity: .45;
+            pointer-events: none;
+        }
+        .ethics-accept-btn.enabled {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .ethics-accept-btn.enabled:hover { opacity: .9; transform: translateY(-1px); }
+        .ethics-note {
+            text-align: center;
+            font-size: .75rem;
+            color: rgba(148, 163, 184, 0.7);
+        }
 
         /* ── Responsive ───────────────────────────────────────────────────── */
         @media (max-width: 480px) {
             .login-card { padding: 2rem 1.5rem; }
+            .ethics-modal-body { padding: 1.125rem; }
+            .ethics-modal-footer { padding: .875rem 1.125rem 1.25rem; }
         }
     </style>
 </head>
 <body>
+
+<!-- ══ ETHICS & COMPLIANCE NOTICE MODAL ═══════════════════════════════════ -->
+<div class="ethics-overlay" id="ethicsOverlay" role="dialog" aria-modal="true" aria-labelledby="ethicsModalTitle">
+    <div class="ethics-modal" id="ethicsModal">
+
+        <div class="ethics-modal-header">
+            <div class="ethics-modal-icon" aria-hidden="true">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <div>
+                <h2 class="ethics-modal-title" id="ethicsModalTitle">Ethics &amp; Compliance Notice</h2>
+                <p class="ethics-modal-subtitle">Please review before continuing</p>
+            </div>
+        </div>
+
+        <div class="ethics-modal-body">
+
+            <div class="ethics-section">
+                <div class="ethics-section-title">
+                    <i class="bi bi-eye-fill"></i> Purpose of this System
+                </div>
+                <p class="ethics-section-text">
+                    This system is used exclusively for recording, managing, and resolving academic compliance violations.
+                    All actions performed here are subject to institutional policy and are permanently logged in a tamper-evident audit trail.
+                </p>
+            </div>
+
+            <hr class="ethics-divider">
+
+            <div class="ethics-section">
+                <div class="ethics-section-title">
+                    <i class="bi bi-person-lock"></i> Data Privacy
+                </div>
+                <p class="ethics-section-text">
+                    Student records and violation data are confidential and protected under applicable data privacy laws.
+                    Unauthorized access, disclosure, or misuse of information is a disciplinary and legal offense.
+                </p>
+            </div>
+
+            <hr class="ethics-divider">
+
+            <div class="ethics-section">
+                <div class="ethics-section-title">
+                    <i class="bi bi-check2-circle"></i> Responsible Use
+                </div>
+                <p class="ethics-section-text">
+                    You are expected to act in good faith. Reports must be factual, objective, and free from personal bias.
+                    Filing a false or malicious report is a serious violation of institutional ethics.
+                </p>
+            </div>
+
+            <div class="ethics-checkbox-row">
+                <input type="checkbox" id="ethicsAck" name="ethicsAck">
+                <label for="ethicsAck" class="ethics-checkbox-label">
+                    I have read and understood this notice. I agree to use this system
+                    <strong>responsibly, ethically, and in accordance with institutional policies.</strong>
+                </label>
+            </div>
+
+        </div>
+
+        <div class="ethics-modal-footer">
+            <button type="button" class="ethics-accept-btn" id="ethicsAcceptBtn" disabled>
+                <i class="bi bi-check-lg me-2" aria-hidden="true"></i>I Acknowledge &amp; Continue
+            </button>
+            <p class="ethics-note">
+                <i class="bi bi-lock-fill me-1" aria-hidden="true"></i>
+                This notice is shown once per session.
+            </p>
+        </div>
+
+    </div>
+</div>
 
 <div class="login-bg">
     <!-- Decorative orbs -->
@@ -473,6 +701,41 @@
             el.style.margin     = '0';
         }, 6000);
     });
+
+    // ── Ethics & Compliance Notice Modal ─────────────────────────────────────
+    (function () {
+        const STORAGE_KEY = 'acvms_ethics_ack';
+        const overlay     = document.getElementById('ethicsOverlay');
+        const ackCheckbox = document.getElementById('ethicsAck');
+        const acceptBtn   = document.getElementById('ethicsAcceptBtn');
+
+        if (!overlay) return;
+
+        // Show once per browser session (sessionStorage resets on tab close)
+        if (!sessionStorage.getItem(STORAGE_KEY)) {
+            setTimeout(() => overlay.classList.add('visible'), 800);
+        }
+
+        // Enable accept button only when checkbox is checked
+        ackCheckbox && ackCheckbox.addEventListener('change', function () {
+            if (this.checked) {
+                acceptBtn.classList.add('enabled');
+                acceptBtn.disabled = false;
+            } else {
+                acceptBtn.classList.remove('enabled');
+                acceptBtn.disabled = true;
+            }
+        });
+
+        // Dismiss modal
+        acceptBtn && acceptBtn.addEventListener('click', function () {
+            sessionStorage.setItem(STORAGE_KEY, '1');
+            overlay.style.transition = 'opacity .25s ease';
+            overlay.style.opacity = '0';
+            overlay.style.pointerEvents = 'none';
+            setTimeout(() => overlay.remove(), 280);
+        });
+    })();
 </script>
 
 </body>
