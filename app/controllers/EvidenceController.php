@@ -161,13 +161,21 @@ class EvidenceController extends Controller
      */
     public function show(int $id): void
     {
-        authorize(['admin', 'teacher', 'registrar']);
+        authorize(['admin', 'teacher', 'registrar', 'student']);
 
         $em     = $this->evidenceModel();
         $record = $em->find($id);
 
         if (!$record) {
             $this->abort(404, 'Evidence file not found.');
+        }
+
+        $authUser = Session::user();
+        if ($authUser['role'] === 'student') {
+            $violation = $this->violationModel()->find($record['violation_id']);
+            if (!$violation || $violation['student_id'] != $authUser['id']) {
+                $this->abort(403, 'You are not authorised to view this evidence file.');
+            }
         }
 
         $absPath = BASE_PATH . '/' . $record['file_path'];

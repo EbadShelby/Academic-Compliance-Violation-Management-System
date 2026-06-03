@@ -115,6 +115,9 @@ class AuthController extends Controller
             'role'  => $user['role'] ?? 'student',
         ], (int) $user['id']);
 
+        // Clear the old inputs so they don't leak to subsequent forms
+        Session::getFlash('old');
+
         // ── 8. Redirect based on role ────────────────────────────────────────
         $role = strtolower($user['role'] ?? 'student');
 

@@ -176,11 +176,16 @@ You are an academic disciplinary compliance assistant. Assess the severity of th
 {$typeContext}Violation description:
 "{$description}"
 
+Assessment Guidelines:
+1. Intent & Impact: Differentiate between harmless/thoughtless behavior (e.g., laughing at a mistake) and targeted harassment.
+2. Frequency: Isolated incidents should be graded lower than repeated/persistent behaviors.
+3. Benefit of the Doubt: If the description is vague and does not explicitly mention physical harm, severe emotional distress, or persistent targeted bullying, do NOT assume a major or critical severity.
+
 Classify the severity using ONLY one of these levels:
-- minor: Minor rule infractions with minimal impact (first-time petty offense, dress code, minor tardiness)
-- moderate: Repeated minor offenses or moderate policy violations (repeated lateness, minor cheating attempt, verbal conflict)
-- major: Serious violations requiring formal disciplinary action (confirmed cheating, aggression, bullying, significant misconduct)
-- critical: Severe violations posing safety risk or major integrity breach (violence, drug use, dangerous behavior, severe fraud)
+- minor: Minor rule infractions or interpersonal friction with minimal impact (e.g., first-time petty offense, dress code, minor tardiness, mild teasing, thoughtless laughter).
+- moderate: Repeated minor offenses or moderate policy violations (e.g., repeated lateness, minor cheating attempt, verbal conflict, isolated mocking or disrespect).
+- major: Serious violations requiring formal disciplinary action (e.g., confirmed cheating, physical aggression, persistent/severe bullying, significant misconduct).
+- critical: Severe violations posing safety risk or major integrity breach (e.g., violence, drug use, dangerous behavior, severe fraud).
 
 Return a JSON object with exactly three fields:
 - severity: one of minor, moderate, major, or critical
@@ -204,6 +209,10 @@ You are an academic disciplinary compliance assistant. Classify this student vio
 
 Violation description:
 "{$description}"
+
+Category Selection Guidelines:
+- "Bullying" must involve targeted, persistent harassment or severe abuse. Isolated incidents of teasing, minor disrespect, or laughing at a classmate should be classified as "Misconduct" or "Other" unless severe malice is explicitly stated.
+- If the report is too vague to definitively categorize, prefer "Other" or a broader category like "Misconduct".
 
 Choose ONLY one category from this exact list:
 {$categories}
@@ -261,13 +270,6 @@ PROMPT;
     // Gemini API Call
     // =========================================================================
 
-    /**
-     * Make a request to the Gemini generateContent endpoint.
-     *
-     * @param  string $apiKey
-     * @param  string $prompt
-     * @return array  ['success' => bool, 'text' => string|null, 'error' => string|null]
-     */
     private function callGemini(string $apiKey, string $prompt): array
     {
         if (!function_exists('curl_init')) {
@@ -285,28 +287,45 @@ PROMPT;
             ],
             'generationConfig' => [
                 'temperature'      => 0.2,            // Low temp → deterministic, factual
-                'maxOutputTokens'  => 8192,           // Very generous — actual JSON output is ~30 tokens;
-                // JSON-constrained mode can over-count, so give plenty of room
+                'maxOutputTokens'  => 8192,           // Very generous
                 'topP'             => 0.8,
-                'responseMimeType' => 'application/json', // Force pure JSON, no markdown fences
+                'responseMimeType' => 'application/json', // Force pure JSON
             ],
         ]);
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => $payload,
-            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-            CURLOPT_TIMEOUT        => self::TIMEOUT_SECONDS,
-            CURLOPT_CONNECTTIMEOUT => 8,
-            CURLOPT_SSL_VERIFYPEER => true,
-        ]);
+        $maxRetries = 3;
+        $attempt = 0;
+        $httpCode = 0;
+        $response = false;
+        $curlErr = '';
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlErr  = curl_error($ch);
-        curl_close($ch);
+        while ($attempt < $maxRetries) {
+            $attempt++;
+            
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $payload,
+                CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+                CURLOPT_TIMEOUT        => self::TIMEOUT_SECONDS,
+                CURLOPT_CONNECTTIMEOUT => 8,
+                CURLOPT_SSL_VERIFYPEER => true,
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlErr  = curl_error($ch);
+            curl_close($ch);
+
+            // Retry on cURL error, 503 Service Unavailable, or 429 Too Many Requests
+            if (($curlErr || $httpCode === 503 || $httpCode === 429 || $httpCode >= 500) && $attempt < $maxRetries) {
+                sleep(1); // Wait 1 second before retrying
+                continue;
+            }
+            
+            break; // Success or non-retriable error
+        }
 
         if ($curlErr) {
             error_log('ACVMS AIClassificationService::callGemini — cURL error: ' . $curlErr);
@@ -335,17 +354,13 @@ PROMPT;
         $data = json_decode($response, true);
 
         // Check for truncation — but attempt recovery first.
-        // JSON-constrained mode sometimes reports MAX_TOKENS even when the output is complete.
-        // If there is valid text content, pass it through; the parser will catch broken JSON.
         $finishReason = $data['candidates'][0]['finishReason'] ?? 'STOP';
         $text         = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
 
         if ($finishReason === 'MAX_TOKENS') {
             if ($text !== null && trim($text) !== '') {
-                // Content present — try to use it; parser will reject if it's truly broken.
                 error_log('ACVMS AIClassificationService::callGemini — finishReason=MAX_TOKENS but content present; attempting parse.');
             } else {
-                // No content at all — genuinely truncated.
                 error_log('ACVMS AIClassificationService::callGemini — Response truly truncated (MAX_TOKENS, no content).');
                 return ['success' => false, 'text' => null, 'error' => 'AI response was truncated. Please try again.'];
             }
@@ -360,14 +375,6 @@ PROMPT;
     }
 
 
-    /**
-     * Like callGemini() but requests plain text output (no JSON MIME type).
-     * Used for the case summary which returns prose, not structured JSON.
-     *
-     * @param  string $apiKey
-     * @param  string $prompt
-     * @return array  ['success' => bool, 'text' => string|null, 'error' => string|null]
-     */
     private function callGeminiText(string $apiKey, string $prompt): array
     {
         if (!function_exists('curl_init')) {
@@ -385,28 +392,45 @@ PROMPT;
             ],
             'generationConfig' => [
                 'temperature'     => 0.4,   // Slightly higher for natural prose
-                'maxOutputTokens' => 8192,  // Generous ceiling — prose summaries vary in length;
-                // better to over-provision than truncate mid-sentence
+                'maxOutputTokens' => 8192,  // Generous ceiling — prose summaries vary in length
                 'topP'            => 0.9,
                 // No responseMimeType — plain text output
             ],
         ]);
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => $payload,
-            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-            CURLOPT_TIMEOUT        => self::TEXT_TIMEOUT_SECONDS, // 30 s — prose is slower than JSON
-            CURLOPT_CONNECTTIMEOUT => 8,
-            CURLOPT_SSL_VERIFYPEER => true,
-        ]);
+        $maxRetries = 3;
+        $attempt = 0;
+        $httpCode = 0;
+        $response = false;
+        $curlErr = '';
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlErr  = curl_error($ch);
-        curl_close($ch);
+        while ($attempt < $maxRetries) {
+            $attempt++;
+            
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $payload,
+                CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+                CURLOPT_TIMEOUT        => self::TEXT_TIMEOUT_SECONDS, // 30 s — prose is slower than JSON
+                CURLOPT_CONNECTTIMEOUT => 8,
+                CURLOPT_SSL_VERIFYPEER => true,
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlErr  = curl_error($ch);
+            curl_close($ch);
+
+            // Retry on cURL error, 503 Service Unavailable, or 429 Too Many Requests
+            if (($curlErr || $httpCode === 503 || $httpCode === 429 || $httpCode >= 500) && $attempt < $maxRetries) {
+                sleep(1); // Wait 1 second before retrying
+                continue;
+            }
+            
+            break; // Success or non-retriable error
+        }
 
         if ($curlErr) {
             error_log('ACVMS AIClassificationService::callGeminiText — cURL error: ' . $curlErr);

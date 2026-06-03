@@ -221,9 +221,7 @@ function formatBytes(int $bytes): string {
 
                 <?php if (!empty($violation['sanction_notes'])): ?>
                 <div class="meta-label mb-2 text-primary"><i class="bi bi-shield-exclamation me-1"></i> Disciplinary Sanction</div>
-                <div class="description-block" style="border-color: rgba(167, 139, 250, 0.4); background: rgba(167, 139, 250, 0.05); color: #c4b5fd;">
-                    <?= htmlspecialchars($violation['sanction_notes']) ?>
-                </div>
+                <div class="description-block" style="border-color: rgba(167, 139, 250, 0.4); background: rgba(167, 139, 250, 0.05); color: #c4b5fd;"><?= htmlspecialchars($violation['sanction_notes']) ?></div>
                 <?php endif; ?>
             </div>
         </div>
